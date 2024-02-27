@@ -1,0 +1,21 @@
+Package: AiGitCraft
+Type: Package
+Title: AiGitCraft: AI-enhanced Git Operations
+Description: Use LLM models to enhance git operations with automatically generated messages and descriptions.
+Version: 0.1.0
+Authors@R: 
+    person("Angelo", "D'Ambrosio", , "a.dambrosioMD@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-2045-5155"))
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    git2r (>= 0.33.0),
+    httr (>= 1.4.7),
+    jsonlite (>= 1.8.8),
+    purrr (>= 1.0.2),
+    tictoc (>= 1.2),
+    vctrs (>= 0.6.5)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
