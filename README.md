@@ -1,0 +1,193 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# AiGitCraft
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+AiGitCraft is an R package designed to enhance Git operations by
+leveraging Large Language Models (LLMs) to automatically generate
+meaningful commit messages, pull request descriptions, and other related
+documentation. It simplifies the process of managing and documenting
+code changes, making it easier for developers to maintain a clear and
+informative history of their project’s evolution.
+
+## Installation
+
+You can install the development version of AiGitCraft from GitHub with:
+
+``` r
+# install.packages("pkgload")
+remotes::install_github("bakaburg1/AiGitCraft")
+```
+
+## Features
+
+- **Automatic Commit Messages**: Generate commit messages that
+  accurately reflect the changes made, using context from the code and
+  project documentation.
+- **Pull Request Descriptions**: Generate detailed and structured pull
+  request descriptions by analyzing the differences between branches.
+- **Commit Differences**: Retrieve and display the differences between
+  commits in a human-readable format, aiding code reviews and
+  documentation.
+- **Uncommitted Changes Summary**: Describe the changes from the last
+  committed state in a repository, helping developers to keep track of
+  modifications.
+- **README Generation**: Automatically write or update README files for
+  repositories based on the content of the DESCRIPTION file and the code
+  files.
+- **LLM Integration**: Utilize various LLM providers such as OpenAI,
+  Azure, or a local LLM server to process natural language tasks related
+  to Git operations.
+
+## Usage
+
+### Generate pull request descriptions
+
+To automatically create a pull request description:
+
+``` r
+library(AiGitCraft)
+
+# Set the repository path and branches
+repo_path <- "path/to/your/repo"
+# or use getwd() or use getOption("aigitcraft_repo")
+
+source_branch <- "main"
+target_branch <- "feature-branch"
+
+# Generate the pull request description
+pr_description <- write_pull_request_description(
+  repo_path, source_branch, target_branch,
+  use_description = TRUE, # Optional, analyze the DESCRIPTION file to
+                            # better understand the changes
+  use_readme = TRUE, # Optional, analyze the README file to better understand
+                       # the changes
+  )
+  
+cat(pr_description)
+```
+
+### Get description of uncommitted changes
+
+To get the description of uncommitted changes in a repository:
+
+``` r
+
+# Get the uncommitted changes summary
+uncommitted_changes_summary <- get_uncommitted_changes_summary(
+    repo = repo_path,
+    screened_folders = "R" # Optional, specify the folders to screen for changes
+    staged = FALSE, # Optional, get the staged changes only
+    use_description = TRUE, # Optional, analyze the DESCRIPTION file to
+                            # better understand the changes
+    use_readme = TRUE, # Optional, analyze the README file to better understand
+                       # the changes
+    cite_changes = TRUE, # Optional, cite the changes positions in the summary.
+                         # doesn't work always
+    suggest_commits = TRUE, # Optional, suggest commit messages for the changes
+
+cat(uncommitted_changes_summary)
+```
+
+### Generate commit messages
+
+To generate a commit message for staged changes:
+
+``` r
+
+# Generate the commit message
+commit_message <- write_commit_message(
+  repo_path,
+  use_conventional_commit = TRUE, # Optional, use the Conventional Commits
+                                   # specification
+  use_description = TRUE, # Optional, analyze the DESCRIPTION file to
+                          # better understand the changes
+  use_readme = TRUE, # Optional, analyze the README file to better understand
+                     # the changes
+  use_files = c(
+  "this_file.R", "that_file.R") # Optional, specify a vector of files to analyze
+                                # to help the LLM to understand the changes
+  )
+```
+
+### Generate README files
+
+To automatically write or update README files for repositories:
+
+``` r
+# Generate the README file
+
+write_repo_readme(
+  repo_path,
+  use_description = TRUE, # Optional, analyze the DESCRIPTION file to
+                          # better understand the changes
+  use_readme = TRUE, # Optional, analyze the README file to better understand
+                     # the changes
+  file_exts = c("R", "py") # Optional, include only the specified file
+                            # extensions in the analysis
+  code_folders = c("R", "test") # Optional, include only the specified
+                                   # folders in the analysis, otherwise the
+                                   # whole repository is analyzed
+  recursive = TRUE # Optional, include the subfolders in the analysis
+  )
+```
+
+## Configuration
+
+Before using AiGitCraft, you need to set up the necessary API keys and
+model identifiers for the language model providers you intend to use.
+This can be done by setting the appropriate options in R:
+
+``` r
+# OpenAI configuration example
+
+options(
+  
+  # API providers
+  aigitcraft_default_llm_provider = "openai",
+  
+  # OpenAI GPT API
+  aigitcraft_openai_api_key_gpt = "your-openai-api-key",
+)
+
+# Azure configuration example
+
+options(
+
+  # API providers
+  aigitcraft_default_llm_provider = "azure",
+
+  # Azure GPT API
+  aigitcraft_azure_resource_gpt = "your-azure-resource",
+  aigitcraft_azure_deployment_gpt = "your-azure-deployment",
+  aigitcraft_azure_api_key_gpt = "your-azure-api-key",
+
+  # Azure common parameters
+  aigitcraft_azure_api_version = "" # See Azure API documentation
+)
+
+# Local LLM server configuration example
+
+options(
+
+  # API providers
+  aigitcraft_default_llm_provider = "local",
+
+  # Local LLM server
+  aigitcraft_local_llm_endpoint = "http://localhost:1234/v1/chat/completions"
+)
+```
+
+## License
+
+AiGitCraft is licensed under the MIT License. See the LICENSE file for
+more details.
+
+------------------------------------------------------------------------
+
+Please note that AiGitCraft is still under development and features may
+change. Always refer to the package’s documentation for the most
+up-to-date information.
