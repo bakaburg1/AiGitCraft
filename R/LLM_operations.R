@@ -337,3 +337,39 @@ write_repo_readme <- function(
 
   })
 }
+
+#' Generate a Twitter thread
+#'
+#' This function uses LLM to generate a Twitter thread based on the repo README.md to present the repo to the community.
+#'
+#' @param repo_path The path to the repository.
+#'
+#' @return A character string with the content of the Twitter thread.
+#'
+#' @export
+#'
+generate_twitter_thread <- function(
+    repo_path = getOption("aigitcraft_repo", getwd())
+) {
+
+  withr::with_dir(repo_path, {
+
+    if (!file.exists("README.md")) {
+      stop("The README.md file does not exist in the repository.")
+    }
+
+    system_prompt = "You are an AI expert in git and version control understanding, whose goal is to help a developer write a Twitter thread to present a code repository to the community."
+
+    user_prompt = c(
+      "I'm working on a code repo and I need to write a Twitter thread to present it to the community.",
+      "The following is the content of the README.md file of the code repo: ####\n\n",
+      readr::read_file("README.md"),
+      "####",
+      "Your task is to understand what the package does and write a short Twitter thread (2 to 4 messages) to present it to the community."
+    ) |>
+      paste(collapse = "\n")
+
+    prompt_llm(c(system = system_prompt, user = user_prompt))
+
+  })
+}

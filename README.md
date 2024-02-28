@@ -41,6 +41,8 @@ remotes::install_github("bakaburg1/AiGitCraft")
 - **LLM Integration**: Utilize various LLM providers such as OpenAI,
   Azure, or a local LLM server to process natural language tasks related
   to Git operations.
+- **Bonus! Create a twitter thread**: Generate a twitter thread to
+  present the repo based on the README.md file.
 
 ## Usage
 
