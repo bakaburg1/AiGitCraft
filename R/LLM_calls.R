@@ -354,7 +354,7 @@ use_azure_llm <- function(
 #'   endpoint.
 use_local_llm <- function(
     body,
-    endpoint = getOption("aigitcraft_local_endpoint_gpt",
+    endpoint = getOption("aigitcraft_local_llm_endpoint",
                          "http://localhost:1234/v1/chat/completions")
 ) {
 
