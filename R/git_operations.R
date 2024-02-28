@@ -181,7 +181,12 @@ get_uncommitted_changes <- function(
 
     # If there are no differences, return NULL
     if (changes == "") {
-      message("No changes since the last commit.")
+      if (isTRUE(staged)) {
+        message("No staged changes.")
+      } else {
+        message("No uncommitted changes since the last commit.")
+      }
+
       return(NULL)
     }
 
