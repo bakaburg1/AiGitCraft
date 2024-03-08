@@ -287,19 +287,23 @@ write_repo_readme <- function(
     use_description = TRUE,
     use_current_readme = TRUE,
     file_exts = getOption("aigitcraft_file_exts"),
-    screened_folders = getOption("aigitcraft_screened_folders", repo),
+    screened_folders = getOption("aigitcraft_screened_folders", repo_path),
     recursive = TRUE,
     ...
 ) {
 
-  withr::with_dir(repo, {
+  withr::with_dir(repo_path, {
 
     system_prompt = "You are an AI expert in git and version control understanding, whose goal is to help a developer write a README file for a code repository."
 
     # Get the content of the code files
     file_text <- list.files(
       screened_folders, full.names = T, recursive = T,
-      pattern = paste0(".", file_exts |> paste(collapse = "|"), "$"),
+      pattern = if (!is.null(file_exts)) {
+        paste0("\\.(", file_exts |> paste(collapse = "|"), ")$")
+        } else {
+          "\\.[^\\.]+$"
+        },
       ignore.case = T) |>
       stringr::str_subset("README", negate = T) |>
       purrr::map_chr(~ paste0(
