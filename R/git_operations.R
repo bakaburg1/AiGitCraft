@@ -50,9 +50,11 @@ get_branch_differences <- function(
 
       # Append commit information and diff to output text
       tryCatch({
-        get_commit_differences(
+        res <- get_commit_differences(
           commit,
-          screened_folders = file.path(getwd(), screened_folders))
+          screened_folders = screened_folders)
+
+        if (is.null(res)) "" else res
       }, error = function(e) {
         warning(e)
         return("")
@@ -108,7 +110,8 @@ get_commit_differences <- function(
   # Get the diff between the commit and its parent
   # This may need adjustment for merge commits or more complex scenarios
   diff_data <- git2r::diff(
-    git2r::tree(target_commit), git2r::tree(source_commit),
+    x = git2r::tree(source_commit),
+    new_tree = git2r::tree(target_commit),
     as_char = TRUE, path = screened_folders)
 
   # If there are no differences, return NULL
