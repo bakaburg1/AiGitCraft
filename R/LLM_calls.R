@@ -182,7 +182,8 @@ prompt_llm <- function(
   llm_fun <- paste0("use_", provider, "_llm")
 
   if (!exists(llm_fun, mode = "function")) {
-    stop("Unsupported LLM provider.")
+    stop("Unsupported LLM provider.
+         You can set it project-wide using the aigitcraft_default_llm_provider option.")
   }
 
   llm_fun <- get(llm_fun)
