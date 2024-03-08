@@ -2,7 +2,7 @@ Package: AiGitCraft
 Type: Package
 Title: AiGitCraft: AI-enhanced Git Operations
 Description: AiGitCraft is an R package designed to enhance Git operations by leveraging Large Language Models (LLMs) to automatically generate meaningful commit messages, pull request descriptions, and other related documentation.
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person("Angelo", "D'Ambrosio", , "a.dambrosioMD@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-2045-5155"))
