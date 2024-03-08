@@ -87,6 +87,12 @@ get_commit_differences <- function(
 
   no_comparison <- FALSE
 
+  # If there are no screened folders, set screened_folders to NULL
+  # otherwise, git2r::diff will throw an error
+  if (length(screened_folders) == 0) {
+    screened_folders <- NULL
+  }
+
   # The use of the parent commit is done here instead of as default argument to
   # have a marker that we are describing the target commit only
   if (is.null(source_commit)) {
