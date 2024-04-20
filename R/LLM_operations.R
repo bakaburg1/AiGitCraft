@@ -96,7 +96,11 @@ Try to infer the most user impacting changes and put them first in the descripti
 Conclude the pull request description with a short and funny poetry of maximum 6 lines expressing the essence of the changes.") |>
       paste(collapse = "\n\n")
 
-    prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+    res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+
+    cat(res)
+
+    invisible(res)
   })
 }
 
@@ -179,7 +183,11 @@ describe_uncommitted_changes <- function(
     ) |>
       paste(collapse = "\n")
 
-    prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+    res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+
+    cat(res)
+
+    invisible(res)
 
   })
 }
@@ -276,7 +284,11 @@ write_commit_message <- function(
     ) |>
       paste(collapse = "\n")
 
-    prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+    res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+
+    cat(res)
+
+    invisible(res)
 
   })
 }
@@ -364,7 +376,11 @@ write_repo_readme <- function(
     ) |>
       paste(collapse = "\n")
 
-    prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+    res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+
+    cat(res)
+
+    invisible(res)
 
   })
 }
@@ -400,7 +416,11 @@ generate_twitter_thread <- function(
     ) |>
       paste(collapse = "\n")
 
-    prompt_llm(c(system = system_prompt, user = user_prompt))
+    res <- prompt_llm(c(system = system_prompt, user = user_prompt))
+
+    cat(res)
+
+    invisible(res)
 
   })
 }
