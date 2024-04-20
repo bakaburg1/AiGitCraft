@@ -66,7 +66,34 @@ write_pull_request_description <- function(
       "######",
       diff_text,
       "#######",
-      "Your task is to understand the difference between the two branches and provide info for a pull request, that is a title and a change log. Use both the commit messages and the diff to understand the logic and implication of the changes. Mention the relevant commit ID when you discuss the changes. Do not describe the project in general, I wrote it! Try to infer the most user impacting changes and put them first in the description and use them to draft the pull request title.") |>
+      "Your task is to understand the difference between the two branches and provide info for a pull request, that is a title and a change log.
+
+Use both the commit messages and the diff to understand the logic and implication of the changes. Mention the relevant commit ID when you discuss the changes. Do not describe the project in general, I wrote it!
+
+Separate the changes into sections such as 'Enhancements', 'Fixes', and 'Documentation', as required.
+
+Format the pull request as markdown with the following structure: ```
+## Pull request title
+
+#### Enhancements
+- Enhancement 1 title: description of enhancement (Commit: ***).
+- Enhancement n title: description of enhancement (Commit: ***).
+
+#### Fixes
+- Fix 1 title: description of fix (Commit: ***).
+- Fix n title: description of fix (Commit: ***).
+
+#### Documentation (optional)
+- Documentation 1 title: description of documentation change (Commit: ***).
+- Documentation n title: description of documentation change (Commit: ***).
+
+#### Summary
+General description of the changes.
+```
+
+Try to infer the most user impacting changes and put them first in the description and use them to draft the pull request title.
+
+Conclude the pull request description with a short and funny poetry of maximum 6 lines expressing the essence of the changes.") |>
       paste(collapse = "\n\n")
 
     prompt_llm(c(system = system_prompt, user = user_prompt), ...)
