@@ -355,6 +355,8 @@ use_azure_llm <- function(
 #' @param body The body of the request.
 #' @param endpoint The local endpoint for the language model service. Can be
 #'   obtained from R options.
+#' @param model Model identifier for the custom API, if needed (some API have
+#'   one model per endpoint, some multiple ones). Obtained from R options.
 #' @param api_key Optional API key for the custom language model services that
 #'   require it. Obtained from R options.
 #'
