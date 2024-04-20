@@ -6,7 +6,7 @@
 \usage{
 prompt_llm(
   messages = NULL,
-  provider = getOption("aigitcraft_default_llm_provider"),
+  provider = getOption("aigitcraft_llm_provider"),
   params = list(temperature = 0),
   force_json = FALSE,
   log_request = getOption("aigitcraft_log_requests", TRUE),

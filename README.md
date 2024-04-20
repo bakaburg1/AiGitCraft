@@ -149,7 +149,7 @@ This can be done by setting the appropriate options in R:
 options(
   
   # API providers
-  aigitcraft_default_llm_provider = "openai",
+  aigitcraft_llm_provider = "openai",
   
   # OpenAI GPT API
   aigitcraft_openai_api_key_gpt = "your-openai-api-key",
@@ -160,7 +160,7 @@ options(
 options(
 
   # API providers
-  aigitcraft_default_llm_provider = "azure",
+  aigitcraft_llm_provider = "azure",
 
   # Azure GPT API
   aigitcraft_azure_resource_gpt = "your-azure-resource",
@@ -176,7 +176,7 @@ options(
 options(
 
   # API providers
-  aigitcraft_default_llm_provider = "local",
+  aigitcraft_llm_provider = "local",
 
   # Local LLM server
   aigitcraft_local_llm_endpoint = "http://localhost:1234/v1/chat/completions"
