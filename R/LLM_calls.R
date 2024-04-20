@@ -156,7 +156,7 @@ process_messages <- function(messages) {
 #'
 prompt_llm <- function(
     messages = NULL,
-    provider = getOption("aigitcraft_default_llm_provider"),
+    provider = getOption("aigitcraft_llm_provider"),
     params = list(
       temperature = 0
     ),
