@@ -166,6 +166,12 @@ prompt_llm <- function(
 
   messages <- process_messages(messages)
 
+  if (is.null(provider)) {
+    stop("Language model provider is not set. ",
+         "You can use the following option to set it globally:\n",
+         "aigitcraft_llm_provider.")
+  }
+
   # Prepare the body of the request and merge with default
   body <- purrr::list_modify(list(
     temperature = 0
@@ -183,7 +189,7 @@ prompt_llm <- function(
 
   if (!exists(llm_fun, mode = "function")) {
     stop("Unsupported LLM provider.
-         You can set it project-wide using the aigitcraft_default_llm_provider option.")
+         You can set it project-wide using the aigitcraft_llm_provider option.")
   }
 
   llm_fun <- get(llm_fun)
@@ -257,7 +263,7 @@ prompt_llm <- function(
 
 #' Use OpenAI Language Model
 #'
-#' Sends a request to the OpenAI API  using the parameters in the `body`
+#' Sends a request to the OpenAI API using the parameters in the `body`
 #' argument. It requires an API key and model identifier set in the R options.
 #'
 #' @param body The body of the request.
@@ -273,7 +279,7 @@ use_openai_llm <- function(
 ) {
 
   if (is.null(api_key) || is.null(model)) {
-    stop("OpenAI GPT model and API key are not set. ",
+    stop("OpenAI GPT model or API key are not set. ",
          "Use the following options to set them:\n",
          "aigitcraft_openai_model_gpt, ",
          "aigitcraft_open_api_key options.")
@@ -394,4 +400,3 @@ use_custom_llm <- function(
   )
 
 }
-
