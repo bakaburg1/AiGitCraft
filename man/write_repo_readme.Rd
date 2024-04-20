@@ -9,7 +9,7 @@ write_repo_readme(
   use_description = TRUE,
   use_current_readme = TRUE,
   file_exts = getOption("aigitcraft_file_exts"),
-  screened_folders = getOption("aigitcraft_screened_folders", repo),
+  screened_folders = getOption("aigitcraft_screened_folders", repo_path),
   recursive = TRUE,
   ...
 )
