@@ -66,7 +66,7 @@ write_pull_request_description <- function(
       "######",
       diff_text,
       "#######",
-      "Your task is to understand the difference between the two branches and provide info for a pull request, that is a title and a change log.
+      "Your task is to understand the difference between the two branches and provide info for a pull request, that is, a title and the change log.
 
 Use both the commit messages and the diff to understand the logic and implication of the changes. Mention the relevant commit ID when you discuss the changes. Do not describe the project in general, I wrote it!
 
