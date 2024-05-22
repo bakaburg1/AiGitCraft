@@ -7,7 +7,8 @@
 use_openai_llm(
   body,
   model = getOption("aigitcraft_openai_model_gpt"),
-  api_key = getOption("aigitcraft_openai_api_key")
+  api_key = getOption("aigitcraft_openai_api_key"),
+  log_request = getOption("aigitcraft_log_requests", TRUE)
 )
 }
 \arguments{
@@ -16,6 +17,9 @@ use_openai_llm(
 \item{model}{Model identifier for the OpenAI API. Obtained from R options.}
 
 \item{api_key}{API key for the OpenAI service. Obtained from R options.}
+
+\item{log_request}{A boolean to log the request time. Can be set up globally
+using the \code{aigitcraft_log_requests} option, which defaults to TRUE.}
 }
 \value{
 The function returns the response from the OpenAI API.
