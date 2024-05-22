@@ -386,8 +386,6 @@ use_custom_llm <- function(
     body$model = model
   }
 
-  body$response_format <- NULL
-
   # Prepare the request
   httr::POST(
     url = endpoint,
