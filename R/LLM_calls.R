@@ -183,7 +183,7 @@ prompt_llm <- function(
 
   body$messages <- messages
 
-  # Force the LLM to answer in JSON format (only openai and azure)
+  # Force the LLM to answer in JSON format (not all models support this)
   if (force_json) {
     body$response_format <- list("type" = "json_object")
   }
