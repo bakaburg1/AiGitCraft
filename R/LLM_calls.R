@@ -172,6 +172,10 @@ prompt_llm <- function(
          "aigitcraft_llm_provider.")
   }
 
+  if (log_request) {
+    check_and_install_dependencies("tictoc")
+  }
+
   # Prepare the body of the request and merge with default
   body <- purrr::list_modify(list(
     temperature = 0
