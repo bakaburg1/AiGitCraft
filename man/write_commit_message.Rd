@@ -29,7 +29,7 @@ README.md file to help understand the changes.}
 \item{use_files}{A vector of file paths to analyze to help understand the
 changes.}
 
-\item{...}{Additional arguments to be passed to \code{prompt_llm}.}
+\item{...}{Additional arguments to be passed to \code{llmR::prompt_llm}.}
 }
 \value{
 A character string with the commit message.

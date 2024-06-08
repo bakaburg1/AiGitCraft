@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.3.3",
+    "Version": "4.4.0",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -375,6 +375,25 @@
       ],
       "Hash": "b8552d117e1b808b09a832f589b79035"
     },
+    "llmR": {
+      "Package": "llmR",
+      "Version": "1.0.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "bakaburg1",
+      "RemoteRepo": "llmR",
+      "RemoteRef": "main",
+      "RemoteSha": "0b89fa1e4fd4c221eab1d57f7f8952ed00422d55",
+      "Requirements": [
+        "httr",
+        "jsonlite",
+        "purrr",
+        "utils",
+        "vctrs"
+      ],
+      "Hash": "96f1b9696976464b2292c73a7c26b2a8"
+    },
     "magrittr": {
       "Package": "magrittr",
       "Version": "2.0.3",
@@ -517,13 +536,13 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "1.0.6",
+      "Version": "1.0.7",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "utils"
       ],
-      "Hash": "9657a35efec183ca64a5bbd71468e97a"
+      "Hash": "397b7b2a265bc5a7a06852524dabae20"
     },
     "rlang": {
       "Package": "rlang",
@@ -628,17 +647,6 @@
         "vctrs"
       ],
       "Hash": "a84e2cc86d07289b3b6f5069df7a004c"
-    },
-    "tictoc": {
-      "Package": "tictoc",
-      "Version": "1.2",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "R",
-        "methods"
-      ],
-      "Hash": "2c6c63f3f4f103d41cb2aae1ab1c7ce1"
     },
     "tidyselect": {
       "Package": "tidyselect",

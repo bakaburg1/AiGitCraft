@@ -35,7 +35,7 @@ analyzing non-code and documentation files.}
 
 \item{recursive}{Logical indicating whether to search for files recursively.}
 
-\item{...}{Additional arguments to be passed to \code{prompt_llm}.}
+\item{...}{Additional arguments to be passed to \code{llmR::prompt_llm}.}
 }
 \value{
 A character string with the content of the README file.

@@ -15,7 +15,7 @@
 #'   the DESCRIPTION file in the repository to help understand the changes.
 #' @param use_readme Logical indicating whether to include the content of the
 #'   README.md file in the repository to help understand the changes.
-#' @param ... Additional arguments to be passed to `prompt_llm`.
+#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
 #'
 #' @return A character string with the pull request description.
 #'
@@ -97,7 +97,8 @@ Try to infer the most user impacting changes and put them first in the descripti
 Conclude the pull request description with a short and funny poetry of maximum 6 lines expressing the essence of the changes.") |>
       paste(collapse = "\n\n")
 
-    res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+    res <- llmR::prompt_llm(
+      c(system = system_prompt, user = user_prompt), ...)
 
     cat(res)
 
@@ -117,7 +118,7 @@ Conclude the pull request description with a short and funny poetry of maximum 6
 #'   the DESCRIPTION file in the review context.
 #' @param use_readme Logical indicating whether to include the content of the
 #'   README.md file in the review context.
-#' @param ... Additional arguments to be passed to `prompt_llm`.
+#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
 #'
 #' @return A character string with the code review report.
 #'
@@ -183,7 +184,8 @@ perform_code_change_review <- function(
   )
 
   # Make the API call to the LLM
-  res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+  res <- llmR::prompt_llm(
+    c(system = system_prompt, user = user_prompt), ...)
 
   cat(res)
 
@@ -209,7 +211,7 @@ perform_code_change_review <- function(
 #' @param suggest_commits Logical indicating whether to include a prompt to
 #'   suggest a commit message and the involved files and lines for each logical
 #'   group of changes.
-#' @param ... Additional arguments to be passed to `prompt_llm`.
+#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
 #'
 #' @return A character string with the description of the changes.
 #'
@@ -273,7 +275,8 @@ describe_uncommitted_changes <- function(
     ) |>
       paste(collapse = "\n")
 
-    res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+    res <- llmR::prompt_llm(
+      c(system = system_prompt, user = user_prompt), ...)
 
     cat(res)
 
@@ -297,7 +300,7 @@ describe_uncommitted_changes <- function(
 #'   README.md file to help understand the changes.
 #' @param use_files A vector of file paths to analyze to help understand the
 #'   changes.
-#' @param ... Additional arguments to be passed to `prompt_llm`.
+#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
 #'
 #' @return A character string with the commit message.
 #'
@@ -375,7 +378,8 @@ write_commit_message <- function(
     ) |>
       paste(collapse = "\n")
 
-    res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+    res <- llmR::prompt_llm(
+      c(system = system_prompt, user = user_prompt), ...)
 
     cat(res)
 
@@ -406,7 +410,7 @@ write_commit_message <- function(
 #'   suggested to include only the code folders, e.g. c("R", "src"), to avoid
 #'   analyzing non-code and documentation files.
 #' @param recursive Logical indicating whether to search for files recursively.
-#' @param ... Additional arguments to be passed to `prompt_llm`.
+#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
 #'
 #' @return A character string with the content of the README file.
 #'
@@ -474,7 +478,8 @@ write_repo_readme <- function(
       }
     )
 
-    res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+    res <- llmR::prompt_llm(
+      c(system = system_prompt, user = user_prompt), ...)
 
     cat(res)
 
@@ -516,7 +521,8 @@ generate_twitter_thread <- function(
     ) |>
       paste(collapse = "\n")
 
-    res <- prompt_llm(c(system = system_prompt, user = user_prompt))
+    res <- llmR::prompt_llm(
+      c(system = system_prompt, user = user_prompt))
 
     cat(res)
 

@@ -162,10 +162,11 @@ write_repo_readme(
 ```
 
 ## Configuration
-
-Before using AiGitCraft, you need to set up the necessary API keys and model
-identifiers for the language model providers you intend to use. This can be done
-by setting the appropriate options in R:
+AiGitCraft uses the `bakaburg1/llmR` package to interact with Large Language
+Models (LLMs).
+To interact with LLM through the llmR package you need to set up the necessary
+API keys and model identifiers for the language model providers you intend to
+use. This can be done by setting the appropriate options in R:
 
 ```r
 # OpenAI configuration example
@@ -173,10 +174,10 @@ by setting the appropriate options in R:
 options(
   
   # API providers
-  aigitcraft_llm_provider = "openai",
+  llmr_llm_provider = "openai",
   
   # OpenAI GPT API
-  aigitcraft_openai_api_key_gpt = "your-openai-api-key",
+  llmr_openai_api_key_gpt = "your-openai-api-key",
 )
 
 # Azure configuration example
@@ -184,15 +185,15 @@ options(
 options(
 
   # API providers
-  aigitcraft_llm_provider = "azure",
+  llmr_llm_provider = "azure",
 
   # Azure GPT API
-  aigitcraft_azure_resource_gpt = "your-azure-resource",
-  aigitcraft_azure_deployment_gpt = "your-azure-deployment",
-  aigitcraft_azure_api_key_gpt = "your-azure-api-key",
+  llmr_azure_resource_gpt = "your-azure-resource",
+  llmr_azure_deployment_gpt = "your-azure-deployment",
+  llmr_azure_api_key_gpt = "your-azure-api-key",
 
   # Azure common parameters
-  aigitcraft_azure_api_version = "" # See Azure API documentation
+  llmr_azure_api_version = "" # See Azure API documentation
 )
 
 # Custom LLM server configuration example
@@ -202,11 +203,11 @@ options(
 options(
 
   # API providers
-  aigitcraft_llm_provider = "custom",
+  llmr_llm_provider = "custom",
 
   # Local LLM server example
-  aigitcraft_custom_llm_endpoint = "http://localhost:1234/v1/chat/completions",
-  aigitcraft_custom_model_gpt = "llama3-8b-8192"
+  llmr_custom_llm_endpoint = "http://localhost:1234/v1/chat/completions",
+  llmr_custom_model_gpt = "llama3-8b-8192"
 )
 
 ```

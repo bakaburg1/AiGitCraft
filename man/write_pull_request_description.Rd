@@ -32,7 +32,7 @@ the DESCRIPTION file in the repository to help understand the changes.}
 \item{use_readme}{Logical indicating whether to include the content of the
 README.md file in the repository to help understand the changes.}
 
-\item{...}{Additional arguments to be passed to \code{prompt_llm}.}
+\item{...}{Additional arguments to be passed to \code{llmR::prompt_llm}.}
 }
 \value{
 A character string with the pull request description.
