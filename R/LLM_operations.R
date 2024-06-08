@@ -185,6 +185,8 @@ perform_code_change_review <- function(
   # Make the API call to the LLM
   res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
 
+  cat(res)
+
   invisible(res)
 }
 
