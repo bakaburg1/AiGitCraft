@@ -57,15 +57,13 @@ source_branch <- "main"
 target_branch <- "feature-branch"
 
 # Generate the pull request description
-pr_description <- write_pull_request_description(
+write_pull_request_description(
   repo_path, source_branch, target_branch,
   use_description = TRUE, # Optional, analyze the DESCRIPTION file to
                             # better understand the changes
   use_readme = TRUE, # Optional, analyze the README file to better understand
                        # the changes
   )
-  
-cat(pr_description)
 ```
 
 ### Get description of uncommitted changes
@@ -75,7 +73,7 @@ To get the description of uncommitted changes in a repository:
 ```r
 
 # Get the uncommitted changes summary
-uncommitted_changes_summary <- get_uncommitted_changes_summary(
+get_uncommitted_changes_summary(
     repo = repo_path,
     screened_folders = "R" # Optional, specify the folders to screen for changes
     staged = FALSE, # Optional, get the staged changes only
@@ -85,9 +83,8 @@ uncommitted_changes_summary <- get_uncommitted_changes_summary(
                        # the changes
     cite_changes = TRUE, # Optional, cite the changes positions in the summary.
                          # doesn't work always
-    suggest_commits = TRUE, # Optional, suggest commit messages for the changes
-
-cat(uncommitted_changes_summary)
+    suggest_commits = TRUE # Optional, suggest commit messages for the changes
+    )
 
 ```
 
@@ -98,7 +95,7 @@ To generate a commit message for staged changes:
 ```r
 
 # Generate the commit message
-commit_message <- write_commit_message(
+write_commit_message(
   repo_path,
   use_conventional_commit = TRUE, # Optional, use the Conventional Commits
                                    # specification
