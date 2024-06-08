@@ -29,6 +29,9 @@ remotes::install_github("bakaburg1/AiGitCraft")
   project documentation.
 - **Pull Request Descriptions**: Generate detailed and structured pull
   request descriptions by analyzing the differences between branches.
+- **Code Review Summaries**: Provide a summary of the changes made,
+  helping reviewers to understand the context and impact of the
+  modifications.
 - **Commit Differences**: Retrieve and display the differences between
   commits in a human-readable format, aiding code reviews and
   documentation.
@@ -109,6 +112,35 @@ write_commit_message(
   use_files = c(
   "this_file.R", "that_file.R") # Optional, specify a vector of files to analyze
                                 # to help the LLM to understand the changes
+  )
+```
+
+### Generate code review summaries
+
+To generate a code review summaries of changes in the code:
+
+``` r
+# Generate the code review of the differences between the current branch and
+# the main branch
+perform_code_change_review(
+  get_branch_differences(screened_folders = "R")
+  )
+  
+# Generate the code review of the uncommitted changes
+perform_code_change_review(
+  get_uncommitted_changes_summary(
+    repo = repo_path,
+    screened_folders = "R"
+    )
+  )
+  
+# Generate the code review of the committee changes
+perform_code_change_review(
+  get_commit_differences(
+    repo_path,
+    commit_sha = "commit_sha",
+    no_comparison = FALSE
+    )
   )
 ```
 

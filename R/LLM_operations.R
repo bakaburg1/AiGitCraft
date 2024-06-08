@@ -105,6 +105,90 @@ Conclude the pull request description with a short and funny poetry of maximum 6
   })
 }
 
+#' Perform AI-Powered Code Review
+#'
+#' This function uses an LLM to perform a detailed code review based on the
+#' provided Git diffs. The review covers code quality, potential bugs, code
+#' smells, security vulnerabilities, performance, and documentation.
+#'
+#' @param git_diff A character string containing the Git diffs.
+#' @param repo_path The path to the repository.
+#' @param use_description Logical indicating whether to include the content of
+#'   the DESCRIPTION file in the review context.
+#' @param use_readme Logical indicating whether to include the content of the
+#'   README.md file in the review context.
+#' @param ... Additional arguments to be passed to `prompt_llm`.
+#'
+#' @return A character string with the code review report.
+#'
+#' @export
+perform_code_change_review <- function(
+    git_diff,
+    repo_path = getOption("aigitcraft_repo", getwd()),
+    use_description = TRUE,
+    use_readme = TRUE,
+    ...
+) {
+
+  # Validate input
+  validate_repo_path(repo_path)
+
+  if (missing(git_diff) || !is.character(git_diff) || nchar(git_diff) == 0) {
+    stop("Invalid git_diff input. Please provide a non-empty string.")
+  }
+
+  # Read contextual files if requested
+  description_prompt <- ""
+  readme_prompt <- ""
+
+  if (isTRUE(use_description)) {
+    description_prompt <- generate_DESCRIPTION_context_prompt(repo_path)
+  }
+
+  if (isTRUE(use_readme)) {
+    readme_prompt <- generate_README_context_prompt(repo_path)
+  }
+
+  # Construct the system prompt for the LLM
+  system_prompt <- paste(
+    "You are an experienced software engineer tasked with performing a",
+    "detailed code review. Your goal is to provide comprehensive feedback",
+    "on the code changes.")
+
+  # Construct the user prompt for the LLM
+  user_prompt <- paste0(
+    "The following is a diff from a Git repository. ",
+    "\n\nGit Diff:\n###",
+    git_diff,
+    "\n###",
+    "Please review the changes thoroughly and provide feedback ",
+    "on the following aspects:",
+    "\n1. Code Quality: Assess the overall quality of the code, including ",
+    "readability, maintainability, and adherence to best practices.",
+    "\n2. Potential Bugs: Identify any potential bugs or issues ",
+    "that might arise from the changes.",
+    "\n3. Code Smells: Detect code smells that could indicate deeper issues ",
+    "in the code structure or design.",
+    "\n4. Security Vulnerabilities: Point out any security vulnerabilities ",
+    "or concerns.",
+    "\n5. Performance: Comment on the performance implications of the changes, ",
+    "if any.",
+    "\n6. Documentation: Evaluate the sufficiency of code comments and ",
+    "documentation. Suggest improvements if needed. ",
+    "\n7. Suggestions: Provide actionable suggestions for improving the code.",
+    description_prompt,
+    readme_prompt,
+    "Provide your code review:",
+    collapse = ""
+  )
+
+  # Make the API call to the LLM
+  res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
+
+  invisible(res)
+}
+
+
 #' Describe the changes from the last committed state in a git repository.
 #'
 #' This function uses LLM to describe the changes from the last committed state
