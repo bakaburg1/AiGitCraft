@@ -30,6 +30,21 @@ write_pull_request_description <- function(
     ...
 ) {
 
+  # Validate input
+  validate_repo_path(repo_path)
+
+  # Read contextual files if requested
+  description_prompt <- ""
+  readme_prompt <- ""
+
+  if (isTRUE(use_description)) {
+    description_prompt <- generate_DESCRIPTION_context_prompt(repo_path)
+  }
+
+  if (isTRUE(use_readme)) {
+    readme_prompt <- generate_README_context_prompt(repo_path)
+  }
+
   withr::with_dir(repo_path, {
 
     system_prompt = "You are an AI expert in git and version control understanding, whose goal is to help a developer write a pull request description."
@@ -46,22 +61,8 @@ write_pull_request_description <- function(
 
     user_prompt = c(
       "The following is the commit by commit diff between my branch and the main branch: ######\n",
-      if (isTRUE(use_description) && file.exists("DESCRIPTION")) {
-        c(
-          "This is the content of the DESCRIPTION file of the code repo, which may give hints on the general goals of the repo:",
-          "####",
-          readr::read_file("DESCRIPTION"),
-          "####"
-        )
-      },
-      if (isTRUE(use_readme) && file.exists("README.md")) {
-        c(
-          "This is the content of the README.md file of the code repo, which describes the repo:",
-          "####",
-          readr::read_file("README.md"),
-          "####"
-        )
-      },
+      description_prompt,
+      readme_prompt,
       "The following is the commit by commit diff between my branch and the main branch:",
       "######",
       diff_text,
@@ -139,6 +140,21 @@ describe_uncommitted_changes <- function(
     ...
 ) {
 
+  # Validate input
+  validate_repo_path(repo_path)
+
+  # Read contextual files if requested
+  description_prompt <- ""
+  readme_prompt <- ""
+
+  if (isTRUE(use_description)) {
+    description_prompt <- generate_DESCRIPTION_context_prompt(repo_path)
+  }
+
+  if (isTRUE(use_readme)) {
+    readme_prompt <- generate_README_context_prompt(repo_path)
+  }
+
   withr::with_dir(repo_path, {
 
     uncommitted_changes <- get_uncommitted_changes(
@@ -154,20 +170,8 @@ describe_uncommitted_changes <- function(
 
     user_prompt = c(
       "I'm working on a code repo and I need to understand what are the last changes introduced since the last commit.",
-      if (isTRUE(use_description) && file.exists("DESCRIPTION")) {
-        c(
-          "This is the content of the DESCRIPTION file of the code repo: ####\n\n",
-          readr::read_file("DESCRIPTION"),
-          "####"
-        )
-      },
-      if (isTRUE(use_readme) && file.exists("README.md")) {
-        c(
-          "This is the content of the README.md file of the code repo: ####\n\n",
-          readr::read_file("README.md"),
-          "####"
-        )
-      },
+      description_prompt,
+      readme_prompt,
       "Here are the changes in the repo since the last commited state:",
       "####",
       uncommitted_changes,
@@ -221,6 +225,21 @@ write_commit_message <- function(
     ...
 ) {
 
+  # Validate input
+  validate_repo_path(repo_path)
+
+  # Read contextual files if requested
+  description_prompt <- ""
+  readme_prompt <- ""
+
+  if (isTRUE(use_description)) {
+    description_prompt <- generate_DESCRIPTION_context_prompt(repo_path)
+  }
+
+  if (isTRUE(use_readme)) {
+    readme_prompt <- generate_README_context_prompt(repo_path)
+  }
+
   withr::with_dir(repo_path, {
 
     staged_changes <- get_uncommitted_changes(
@@ -234,22 +253,8 @@ write_commit_message <- function(
 
     user_prompt = c(
       "I'm working on a code repo and I need to write a commit message for the staged changes.",
-      if (isTRUE(use_description) && file.exists("DESCRIPTION")) {
-        c(
-          "This is the content of the DESCRIPTION file of the code repo which may give hints on the general goals of the repo:",
-          "####",
-          readr::read_file("DESCRIPTION"),
-          "####"
-        )
-      },
-      if (isTRUE(use_readme) && file.exists("README.md")) {
-        c(
-          "This is the content of the README.md file of the code repo which describes the repo:",
-          "####",
-          readr::read_file("README.md"),
-          "####"
-        )
-      },
+      description_prompt,
+      readme_prompt,
       if (length(use_files) > 0) {
         c(
           "The following is the content of related files you need to analyze to understand the changes:",
@@ -331,6 +336,17 @@ write_repo_readme <- function(
     ...
 ) {
 
+  # Validate input
+  validate_repo_path(repo_path)
+
+  # Read contextual files if requested
+  description_prompt <- ""
+  readme_prompt <- ""
+
+  if (isTRUE(use_description)) {
+    description_prompt <- generate_DESCRIPTION_context_prompt(repo_path)
+  }
+
   withr::with_dir(repo_path, {
 
     system_prompt = "You are an AI expert in git and version control understanding, whose goal is to help a developer write a README file for a code repository."
@@ -340,9 +356,9 @@ write_repo_readme <- function(
       screened_folders, full.names = T, recursive = T,
       pattern = if (!is.null(file_exts)) {
         paste0("\\.(", file_exts |> paste(collapse = "|"), ")$")
-        } else {
-          "\\.[^\\.]+$"
-        },
+      } else {
+        "\\.[^\\.]+$"
+      },
       ignore.case = T) |>
       stringr::str_subset("README", negate = T) |>
       purrr::map_chr(~ paste0(
@@ -350,31 +366,27 @@ write_repo_readme <- function(
       ) |> paste(collapse = "\n\n")
 
 
-    user_prompt = c(
+    user_prompt = paste0(
       "I'm working on a code repo and I need to write/improve the README.md file for it.",
-      if (isTRUE(use_description) && file.exists("DESCRIPTION")) {
-        c(
-          "This is the content of the DESCRIPTION file of the code repo, which may give hints on the general goals of the repo: ####\n\n",
-          readr::read_file("DESCRIPTION"),
-          "####"
-        )
-      },
+      description_prompt,
       "The following is the content of the code files you need to analyze for writing the README:",
       "####",
       file_text,
       "####",
       if (isTRUE(use_current_readme) && file.exists("README.md")) {
-        c(
-          "This is the content of the current README.md file of the code repo: ####\n\n",
+        paste(
+          "This is the content of the current README.md file of the code repo:",
+          "####\n\n",
           readr::read_file("README.md"),
           "####",
-          "Your task is to understand what the package does and update the README.md to provide a proper and well documented description of the repo."
+          "Your task is to understand what the package does and update the",
+          "README.md to provide a proper and well documented",
+          "description of the repo."
         )
       } else {
         "Your task is to understand what the package does and write a proper and well documented README.md file content."
       }
-    ) |>
-      paste(collapse = "\n")
+    )
 
     res <- prompt_llm(c(system = system_prompt, user = user_prompt), ...)
 
@@ -398,6 +410,8 @@ write_repo_readme <- function(
 generate_twitter_thread <- function(
     repo_path = getOption("aigitcraft_repo", getwd())
 ) {
+
+  validate_repo_path(repo_path)
 
   withr::with_dir(repo_path, {
 
