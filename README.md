@@ -168,15 +168,18 @@ options(
   aigitcraft_azure_api_version = "" # See Azure API documentation
 )
 
-# Local LLM server configuration example
+# Custom LLM server configuration example
+# Can be used for local LLM servers or custom API endpoints following the
+# OpenAi API specification.
 
 options(
 
   # API providers
-  aigitcraft_llm_provider = "local",
+  aigitcraft_llm_provider = "custom",
 
-  # Local LLM server
-  aigitcraft_local_llm_endpoint = "http://localhost:1234/v1/chat/completions"
+  # Local LLM server example
+  aigitcraft_custom_llm_endpoint = "http://localhost:1234/v1/chat/completions",
+  aigitcraft_custom_model_gpt = "llama3-8b-8192"
 )
 ```
 
