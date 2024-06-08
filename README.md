@@ -29,6 +29,9 @@ remotes::install_github("bakaburg1/AiGitCraft")
   project documentation.
 - **Pull Request Descriptions**: Generate detailed and structured pull
   request descriptions by analyzing the differences between branches.
+- **Code Review Summaries**: Provide a summary of the changes made,
+  helping reviewers to understand the context and impact of the
+  modifications.
 - **Commit Differences**: Retrieve and display the differences between
   commits in a human-readable format, aiding code reviews and
   documentation.
@@ -61,15 +64,13 @@ source_branch <- "main"
 target_branch <- "feature-branch"
 
 # Generate the pull request description
-pr_description <- write_pull_request_description(
+write_pull_request_description(
   repo_path, source_branch, target_branch,
   use_description = TRUE, # Optional, analyze the DESCRIPTION file to
                             # better understand the changes
   use_readme = TRUE, # Optional, analyze the README file to better understand
                        # the changes
   )
-  
-cat(pr_description)
 ```
 
 ### Get description of uncommitted changes
@@ -79,7 +80,7 @@ To get the description of uncommitted changes in a repository:
 ``` r
 
 # Get the uncommitted changes summary
-uncommitted_changes_summary <- get_uncommitted_changes_summary(
+get_uncommitted_changes_summary(
     repo = repo_path,
     screened_folders = "R" # Optional, specify the folders to screen for changes
     staged = FALSE, # Optional, get the staged changes only
@@ -89,9 +90,8 @@ uncommitted_changes_summary <- get_uncommitted_changes_summary(
                        # the changes
     cite_changes = TRUE, # Optional, cite the changes positions in the summary.
                          # doesn't work always
-    suggest_commits = TRUE, # Optional, suggest commit messages for the changes
-
-cat(uncommitted_changes_summary)
+    suggest_commits = TRUE # Optional, suggest commit messages for the changes
+    )
 ```
 
 ### Generate commit messages
@@ -101,7 +101,7 @@ To generate a commit message for staged changes:
 ``` r
 
 # Generate the commit message
-commit_message <- write_commit_message(
+write_commit_message(
   repo_path,
   use_conventional_commit = TRUE, # Optional, use the Conventional Commits
                                    # specification
@@ -112,6 +112,35 @@ commit_message <- write_commit_message(
   use_files = c(
   "this_file.R", "that_file.R") # Optional, specify a vector of files to analyze
                                 # to help the LLM to understand the changes
+  )
+```
+
+### Generate code review summaries
+
+To generate a code review summaries of changes in the code:
+
+``` r
+# Generate the code review of the differences between the current branch and
+# the main branch
+perform_code_change_review(
+  get_branch_differences(screened_folders = "R")
+  )
+  
+# Generate the code review of the uncommitted changes
+perform_code_change_review(
+  get_uncommitted_changes_summary(
+    repo = repo_path,
+    screened_folders = "R"
+    )
+  )
+  
+# Generate the code review of the committee changes
+perform_code_change_review(
+  get_commit_differences(
+    repo_path,
+    commit_sha = "commit_sha",
+    no_comparison = FALSE
+    )
   )
 ```
 
@@ -139,9 +168,11 @@ write_repo_readme(
 
 ## Configuration
 
-Before using AiGitCraft, you need to set up the necessary API keys and
-model identifiers for the language model providers you intend to use.
-This can be done by setting the appropriate options in R:
+AiGitCraft uses the `bakaburg1/llmR` package to interact with Large
+Language Models (LLMs). To interact with LLM through the llmR package
+you need to set up the necessary API keys and model identifiers for the
+language model providers you intend to use. This can be done by setting
+the appropriate options in R:
 
 ``` r
 # OpenAI configuration example
@@ -149,10 +180,10 @@ This can be done by setting the appropriate options in R:
 options(
   
   # API providers
-  aigitcraft_default_llm_provider = "openai",
+  llmr_llm_provider = "openai",
   
   # OpenAI GPT API
-  aigitcraft_openai_api_key_gpt = "your-openai-api-key",
+  llmr_openai_api_key_gpt = "your-openai-api-key",
 )
 
 # Azure configuration example
@@ -160,26 +191,29 @@ options(
 options(
 
   # API providers
-  aigitcraft_default_llm_provider = "azure",
+  llmr_llm_provider = "azure",
 
   # Azure GPT API
-  aigitcraft_azure_resource_gpt = "your-azure-resource",
-  aigitcraft_azure_deployment_gpt = "your-azure-deployment",
-  aigitcraft_azure_api_key_gpt = "your-azure-api-key",
+  llmr_azure_resource_gpt = "your-azure-resource",
+  llmr_azure_deployment_gpt = "your-azure-deployment",
+  llmr_azure_api_key_gpt = "your-azure-api-key",
 
   # Azure common parameters
-  aigitcraft_azure_api_version = "" # See Azure API documentation
+  llmr_azure_api_version = "" # See Azure API documentation
 )
 
-# Local LLM server configuration example
+# Custom LLM server configuration example
+# Can be used for local LLM servers or custom API endpoints following the
+# OpenAi API specification.
 
 options(
 
   # API providers
-  aigitcraft_default_llm_provider = "local",
+  llmr_llm_provider = "custom",
 
-  # Local LLM server
-  aigitcraft_local_llm_endpoint = "http://localhost:1234/v1/chat/completions"
+  # Local LLM server example
+  llmr_custom_llm_endpoint = "http://localhost:1234/v1/chat/completions",
+  llmr_custom_model_gpt = "llama3-8b-8192"
 )
 ```
 
