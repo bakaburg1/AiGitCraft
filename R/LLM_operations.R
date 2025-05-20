@@ -374,7 +374,8 @@ write_commit_message <- function(
       ###
       "
       },
-      "Remember that the commit message title should be a short and meaningful description of the changes while you can add more details in message body."
+      "Remember that the commit message title should be a short and meaningful description of the changes while you can add more details in message body.
+      Be synthetic and concise both in the title and the body. Describe only, do not comment changes unless the motivation is not obvious. Use the imperative mood for the title. In the body, describe the changes as a list of bullet points, without any other text."
     ) |>
       paste(collapse = "\n")
 
