@@ -267,10 +267,10 @@ describe_uncommitted_changes <- function(
       "Your task is to understand the edits and provide a summary of the changes.",
       "Try to be smart and understand changes that are part of a logical group of changes (e.g. a new functionality, a bug fix, a refactoring, etc.) even if on different files and will be probably be committed together, and those that are isolated (i.e., will be committed individually).",
       if (isTRUE(cite_changes)) {
-        "Cite the relevant files and lines for the changes you describe."
+        "Cite the interested files impacted by the changes you describe. Add the interested lines when you list the files. you can find them in the git diff."
       },
       if (isTRUE(suggest_commits)) {
-        "If you can, suggest a commit message and the involved files and lines for each logical group of changes."
+        "Suggest a commit message and the involved files and lines for each logical group of changes."
       }
     ) |>
       paste(collapse = "\n")
@@ -374,7 +374,8 @@ write_commit_message <- function(
       ###
       "
       },
-      "Remember that the commit message title should be a short and meaningful description of the changes while you can add more details in message body."
+      "Remember that the commit message title should be a short and meaningful description of the changes while you can add more details in message body.
+      Be synthetic and concise both in the title and the body. Describe only, do not comment changes unless the motivation is not obvious. Use the imperative mood for the title. In the body, describe the changes as a list of bullet points, without any other text."
     ) |>
       paste(collapse = "\n")
 
