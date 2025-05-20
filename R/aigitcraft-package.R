@@ -1,4 +1,3 @@
-# Produce the package general documentation
 #' @title AI Gitcraft
 #'
 #' @name AiGitcraft
