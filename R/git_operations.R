@@ -16,51 +16,68 @@
 #'
 #' @export
 get_branch_differences <- function(
-    repo_path = getOption("aigitcraft_repo", getwd()),
-    target_branch = git2r::repository_head()$name,
-    source_branch = "main",
-    screened_folders = NULL
+  repo_path = getOption("aigitcraft_repo", getwd()),
+  target_branch = NULL,
+  source_branch = "main",
+  screened_folders = NULL
 ) {
   # TODO: add possibility to analyze only specific files
 
-  withr::with_dir(repo_path, {
+  validate_repo_path(repo_path)
 
-    # Open the repository
-    repo <- git2r::repository(repo_path)
+  if (length(screened_folders) == 0) {
+    screened_folders <- NULL
+  }
 
-    # List commits on source_branch not on target_branch
-    source_commits <- git2r::commits(repo, ref = source_branch)
-    target_commits <- git2r::commits(repo, ref = target_branch)
-    diff_commits <- setdiff(target_commits, source_commits)
+  if (is.null(target_branch)) {
+    target_branch <- gert::git_branch(repo = repo_path)
+  }
 
-    if (length(diff_commits) == 0) {
-      message("No differences between the branches.")
-      return(NULL)
-    }
+  max_commits <- getOption("aigitcraft_git_log_max", 1000L)
+  max_commits <- as.integer(max_commits)
+  if (is.na(max_commits) || max_commits <= 0L) {
+    max_commits <- 1000L
+  }
 
-    # Iterate over the commits
-    purrr::map_chr(diff_commits, \(commit) {
+  target_commits <- gert::git_log(
+    ref = target_branch,
+    max = max_commits,
+    repo = repo_path
+  )
 
-      # Assuming each commit has one parent for simplicity
-      parent_commit <- git2r::parents(commit)[[1]]
+  source_commits <- gert::git_log(
+    ref = source_branch,
+    max = max_commits,
+    repo = repo_path
+  )
 
-      if (length(parent_commit) == 0) {
-        return("")
-      }
+  diff_commits <- target_commits$commit[
+    !target_commits$commit %in% source_commits$commit
+  ]
 
-      # Append commit information and diff to output text
-      tryCatch({
+  if (length(diff_commits) == 0) {
+    message("No differences between the branches.")
+    return(NULL)
+  }
+
+  purrr::map_chr(diff_commits, function(commit_id) {
+    tryCatch(
+      {
         res <- get_commit_differences(
-          commit,
-          screened_folders = screened_folders)
+          repo_path = repo_path,
+          target_commit = commit_id,
+          screened_folders = screened_folders
+        )
 
         if (is.null(res)) "" else res
-      }, error = function(e) {
+      },
+      error = function(e) {
         warning(e)
-        return("")
-      })
-    }) |> paste(collapse = "\n")
-  })
+        ""
+      }
+    )
+  }) |>
+    paste(collapse = "\n")
 }
 
 
@@ -68,6 +85,7 @@ get_branch_differences <- function(
 #'
 #' This function returns the differences between two commits.
 #'
+#' @param repo_path The path to the repository.
 #' @param target_commit The target commit.
 #' @param source_commit The source commit. If NULL, the parent commit of the
 #'   target commit is used.
@@ -80,73 +98,105 @@ get_branch_differences <- function(
 #'
 #' @export
 get_commit_differences <- function(
-    target_commit = git2r::last_commit(
-      getOption("aigitcraft_repo", getwd())
-    ),
-    source_commit = NULL,
-    screened_folders = NULL
+  repo_path = getOption("aigitcraft_repo", getwd()),
+  target_commit = NULL,
+  source_commit = NULL,
+  screened_folders = NULL
 ) {
+  validate_repo_path(repo_path)
 
-  no_comparison <- FALSE
-
-  # If there are no screened folders, set screened_folders to NULL
-  # otherwise, git2r::diff will throw an error
   if (length(screened_folders) == 0) {
     screened_folders <- NULL
   }
 
-  # The use of the parent commit is done here instead of as default argument to
-  # have a marker that we are describing the target commit only
-  if (is.null(source_commit)) {
-    source_commit <- git2r::parents(target_commit)[[1]]
+  withr::with_dir(repo_path, {
+    if (is.null(target_commit)) {
+      target_commit <- gert::git_commit_id()
+    }
 
-    no_comparison <- TRUE
-  }
+    target_info <- gert::git_commit_info(target_commit)
+    using_parent <- is.null(source_commit)
 
-  if (length(source_commit) == 0) {
-    stop("Diff on the first commit has not yet been implemented.")
-  }
+    if (using_parent) {
+      if (length(target_info$parents) == 0) {
+        stop("Diff on the first commit has not yet been implemented.")
+      }
+      source_commit <- target_info$parents[[1]]
+    }
 
-  # Get the diff between the commit and its parent
-  # This may need adjustment for merge commits or more complex scenarios
-  diff_data <- git2r::diff(
-    x = git2r::tree(source_commit),
-    new_tree = git2r::tree(target_commit),
-    as_char = TRUE, path = screened_folders)
+    if (is.null(source_commit) || !nzchar(source_commit)) {
+      stop("Unable to determine source commit for comparison.")
+    }
 
-  # If there are no differences, return NULL
-  if (diff_data == "") {
-    message("No differences between the commits.")
-    return(NULL)
-  }
+    if (!using_parent) {
+      source_info <- gert::git_commit_info(source_commit)
+    } else {
+      source_info <- NULL
+    }
 
-  # Append commit information and diff to output text
-  if (no_comparison) {
-    # Detail on the target commit
-    output_text <- paste0(
-      "Commit: ", git2r::sha(target_commit), "\n",
-      "Parent Commit", git2r::sha(source_commit), "\n",
-      "Message: ", target_commit$message, "\n",
-      "Date: ", target_commit$author$when, "\n\n",
-      "Differences: #####\n",
-      diff_data,
-      "\n\n--------------------------------\n\n")
-  } else {
-    # Comparison between commits
-    output_text <- paste0(
-      sprintf(
-        "Commits: %s vs %s\n",
-        git2r::sha(target_commit), git2r::sha(source_commit)),
-      sprintf(
-        "Dates: %s vs %s\n",
-        target_commit$author$when, source_commit$author$when),
+    diff_args <- c("diff", source_commit, target_commit)
+    if (!is.null(screened_folders)) {
+      diff_args <- c(diff_args, "--", screened_folders)
+    }
 
-      "Differences: #####\n",
-      diff_data,
-      "\n\n--------------------------------\n\n")
-  }
+    diff_output <- system2(
+      command = "git",
+      args = diff_args,
+      stdout = TRUE,
+      stderr = TRUE
+    )
+    status <- attr(diff_output, "status")
+    if (!is.null(status) && status != 0) {
+      err <- attr(diff_output, "stderr")
+      err_msg <- if (length(err)) paste(err, collapse = "\n") else
+        "unknown git error"
+      stop("Failed to compute git diff: ", err_msg)
+    }
+    diff_text <- paste(diff_output, collapse = "\n")
 
-  return(output_text)
+    if (identical(diff_text, "")) {
+      message("No differences between the commits.")
+      return(NULL)
+    }
+
+    formatted_time <- function(x) format(x, usetz = TRUE)
+
+    if (using_parent) {
+      paste0(
+        "Commit: ",
+        target_commit,
+        "\n",
+        "Parent Commit: ",
+        source_commit,
+        "\n",
+        "Message: ",
+        target_info$message,
+        "\n",
+        "Date: ",
+        formatted_time(target_info$time),
+        "\n\n",
+        "Differences: #####\n",
+        diff_text,
+        "\n\n--------------------------------\n\n"
+      )
+    } else {
+      paste0(
+        sprintf(
+          "Commits: %s vs %s\n",
+          target_commit,
+          source_commit
+        ),
+        sprintf(
+          "Dates: %s vs %s\n",
+          formatted_time(target_info$time),
+          formatted_time(source_info$time)
+        ),
+        "Differences: #####\n",
+        diff_text,
+        "\n\n--------------------------------\n\n"
+      )
+    }
+  })
 }
 
 #' Get the uncommitted changes in the repository
@@ -163,33 +213,45 @@ get_commit_differences <- function(
 #'
 #' @export
 get_uncommitted_changes <- function(
-    repo_path = getOption("aigitcraft_repo", getwd()),
-    screened_folders = NULL,
-    staged = FALSE
+  repo_path = getOption("aigitcraft_repo", getwd()),
+  screened_folders = NULL,
+  staged = FALSE
 ) {
+  validate_repo_path(repo_path)
+
+  if (length(screened_folders) == 0) {
+    screened_folders <- NULL
+  }
 
   withr::with_dir(repo_path, {
-
-    if (isFALSE(staged)) {
-      changes <- git2r::diff(
-        git2r::tree(
-          git2r::last_commit(repo_path)),
-        as_char = T,
-        path = screened_folders)
+    diff_args <- if (isTRUE(staged)) {
+      c("diff", "--cached")
     } else {
-      if (is.null(screened_folders)) {
-        screened_folders <- ""
-      }
-
-      gitCommand <- sprintf("git diff --cached %s", screened_folders) |>
-        trimws()
-
-      # Execute the git command and capture the output
-      changes <- system(gitCommand, intern = TRUE) |> paste(collapse = "\n")
+      c("diff", "HEAD")
     }
 
+    if (!is.null(screened_folders)) {
+      diff_args <- c(diff_args, "--", screened_folders)
+    }
+
+    changes <- system2(
+      command = "git",
+      args = diff_args,
+      stdout = TRUE,
+      stderr = TRUE
+    )
+    status <- attr(changes, "status")
+    if (!is.null(status) && status != 0) {
+      err <- attr(changes, "stderr")
+      err_msg <- if (length(err)) paste(err, collapse = "\n") else
+        "unknown git error"
+      stop("Failed to retrieve git diff: ", err_msg)
+    }
+
+    diff_text <- paste(changes, collapse = "\n")
+
     # If there are no differences, return NULL
-    if (changes == "") {
+    if (identical(diff_text, "")) {
       if (isTRUE(staged)) {
         message("No staged changes.")
       } else {
@@ -199,7 +261,6 @@ get_uncommitted_changes <- function(
       return(NULL)
     }
 
-    changes
+    diff_text
   })
 }
-
