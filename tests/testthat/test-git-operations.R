@@ -92,6 +92,50 @@ test_that("get_branch_differences aggregates commit diffs", {
   expect_match(diff_summary, "feature change")
 })
 
+test_that("get_branch_differences auto-detects active branch from data frame", {
+  skip_if_not_installed("gert")
+  skip_if_no_git()
+
+  repo <- withr::local_tempdir()
+  gert::git_init(repo)
+
+  withr::with_dir(repo, {
+    writeLines("base", "file.txt")
+    gert::git_add("file.txt")
+    gert::git_commit("Base commit")
+  })
+
+  default_branch <- withr::with_dir(repo, gert::git_branch())
+  gert::git_branch_create("feature", repo = repo)
+  gert::git_branch_checkout("feature", repo = repo)
+
+  withr::with_dir(repo, {
+    writeLines(c("base", "feature change"), "file.txt")
+    gert::git_add("file.txt")
+    gert::git_commit("Feature work")
+  })
+
+  branch_df <- data.frame(
+    name = c(default_branch, "feature"),
+    head = c(FALSE, TRUE),
+    active = c(FALSE, TRUE),
+    stringsAsFactors = FALSE
+  )
+
+  diff_summary <- testthat::with_mocked_bindings(
+    get_branch_differences(
+      repo_path = repo,
+      target_branch = NULL,
+      source_branch = default_branch
+    ),
+    git_branch = function(repo) branch_df,
+    .package = "gert"
+  )
+
+  expect_match(diff_summary, "Feature work")
+  expect_match(diff_summary, "feature change")
+})
+
 test_that("get_uncommitted_changes reports staged and unstaged", {
   skip_if_not_installed("gert")
   skip_if_no_git()
