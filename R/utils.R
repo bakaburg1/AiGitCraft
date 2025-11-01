@@ -59,6 +59,100 @@ validate_repo_path <- function(repo_path) {
   }
 }
 
+#' Normalize branch metadata returned by gert
+#'
+#' @param branch_info Value returned by [gert::git_branch()].
+#' @param repo_path Repository path, used for error context.
+#'
+#' @return Character scalar with the branch name.
+resolve_git_branch <- function(branch_info, repo_path) {
+  # Handle case where input is NULL: cannot continue without branch info
+  if (is.null(branch_info)) {
+    cli::cli_abort(
+      "Unable to determine target branch for repository {.path {repo_path}}."
+    )
+  }
+
+  # Main path: branch_info is a data.frame (most likely gert::git_branch()
+  # output)
+  if (is.data.frame(branch_info)) {
+    # Fail early if there are no rows, i.e. no branches found
+    if (nrow(branch_info) == 0L) {
+      cli::cli_abort("No branches found in repository {.path {repo_path}}.")
+    }
+
+    # Prepare to detect HEAD/active branch in flexible schema
+    branch_flags <- rep(FALSE, nrow(branch_info))
+    if ("head" %in% names(branch_info)) {
+      # 'head' is typical with gert, TRUE for row representing current HEAD
+      branch_flags <- branch_flags |
+        vapply(
+          branch_info$head,
+          function(value) isTRUE(as.logical(value)),
+          logical(1)
+        )
+    }
+    if ("active" %in% names(branch_info)) {
+      # Some situations use 'active' instead of 'head'
+      branch_flags <- branch_flags |
+        vapply(
+          branch_info$active,
+          function(value) isTRUE(as.logical(value)),
+          logical(1)
+        )
+    }
+
+    # Identify which row(s) is considered HEAD/active branch
+    head_idx <- which(branch_flags)
+    if (length(head_idx) == 0L) {
+      # If not found, fallback to first row (arbitrary, but safe in most CLIs)
+      head_idx <- 1L
+    } else {
+      # Take the first match if multiple
+      head_idx <- head_idx[[1]]
+    }
+
+    # Flexibly retrieve the correct column for branch name, supporting both
+    # styles
+    name_column <- NULL
+    if ("name" %in% names(branch_info)) {
+      name_column <- branch_info$name
+    } else if ("branch" %in% names(branch_info)) {
+      name_column <- branch_info$branch
+    }
+
+    # Defensive: abort if we couldn't find a proper column or index out of
+    # bounds
+    if (is.null(name_column) || length(name_column) < head_idx) {
+      cli::cli_abort(
+        "Unable to determine target branch from repository metadata."
+      )
+    }
+
+    branch_name <- name_column[[head_idx]]
+    # Validate branch name is proper non-empty character scalar
+    if (!is.character(branch_name) || !nzchar(branch_name)) {
+      cli::cli_abort("Invalid branch name detected in repository metadata.")
+    }
+
+    return(branch_name)
+  }
+
+  # If branch_info is already a character vector, return its first element
+  if (is.character(branch_info)) {
+    branch_name <- branch_info[[1]]
+    if (!nzchar(branch_name)) {
+      cli::cli_abort("Invalid branch name returned by gert::git_branch().")
+    }
+    return(branch_name)
+  }
+
+  # Defensive: catch all other unexpected input types
+  cli::cli_abort(
+    "Unsupported branch metadata type returned by gert::git_branch() for repository {.path {repo_path}}."
+  )
+}
+
 #' Include context from a file in a prompt
 #'
 #' This function reads a file and includes its content in a prompt.
