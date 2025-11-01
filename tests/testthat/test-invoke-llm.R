@@ -42,11 +42,11 @@ test_that("invoke_llm honours explicit provider", {
       list(chat = function(prompt) paste("echo", prompt))
     },
     .package = "ellmer",
-      with_mocked_bindings(
-        cli_alert = function(...) invisible(NULL),
-        .package = "cli",
-        invoke_llm("sys", "usr", name = "anthropic/test")
-      )
+    with_mocked_bindings(
+      cli_alert = function(...) invisible(NULL),
+      .package = "cli",
+      invoke_llm("sys", "usr", name = "anthropic/test")
+    )
   )
 
   expect_equal(response, "echo usr")
