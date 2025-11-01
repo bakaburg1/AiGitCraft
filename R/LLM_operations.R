@@ -138,7 +138,7 @@ perform_code_change_review <- function(
   validate_repo_path(repo_path)
 
   if (missing(git_diff) || !is.character(git_diff) || nchar(git_diff) == 0) {
-    stop("Invalid git_diff input. Please provide a non-empty string.")
+    cli::cli_abort("Invalid git_diff input. Please provide a non-empty string.")
   }
 
   # Read contextual files if requested
@@ -520,7 +520,7 @@ generate_twitter_thread <- function(
 
   withr::with_dir(repo_path, {
     if (!file.exists("README.md")) {
-      stop("The README.md file does not exist in the repository.")
+      cli::cli_abort("The README.md file does not exist in the repository.")
     }
 
     system_prompt = "You are an AI expert in git and version control understanding, whose goal is to help a developer write a Twitter thread to present a code repository to the community."

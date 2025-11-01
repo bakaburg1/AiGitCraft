@@ -30,7 +30,7 @@ check_and_install_dependencies <- function(deps) {
               is_installed <- requireNamespace(dep, quietly = FALSE)
             },
             error = function(e) {
-              stop("Failed to install ", dep, ": ", e$message)
+              cli::cli_abort("Failed to install {dep}: {e$message}")
             }
           )
         }
@@ -38,7 +38,7 @@ check_and_install_dependencies <- function(deps) {
     }
 
     # Stop if the package is not installed
-    if (!is_installed) stop(stop_message)
+    if (!is_installed) cli::cli_abort(stop_message)
   }
 }
 
@@ -51,11 +51,11 @@ check_and_install_dependencies <- function(deps) {
 #' @return Nothing.
 validate_repo_path <- function(repo_path) {
   if (!dir.exists(repo_path)) {
-    stop("Invalid repo_path. Please provide a valid directory path.")
+    cli::cli_abort("Invalid repo_path. Please provide a valid directory path.")
   }
 
   if (!file.exists(file.path(repo_path, ".git"))) {
-    stop("The repository path does not contain a .git folder.")
+    cli::cli_abort("The repository path does not contain a .git folder.")
   }
 }
 

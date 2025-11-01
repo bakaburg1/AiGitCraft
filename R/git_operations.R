@@ -56,7 +56,7 @@ get_branch_differences <- function(
   ]
 
   if (length(diff_commits) == 0) {
-    message("No differences between the branches.")
+    cli::cli_alert_info("No differences between the branches.")
     return(NULL)
   }
 
@@ -72,7 +72,7 @@ get_branch_differences <- function(
         if (is.null(res)) "" else res
       },
       error = function(e) {
-        warning(e)
+        cli::cli_alert_danger(conditionMessage(e))
         ""
       }
     )
@@ -119,13 +119,13 @@ get_commit_differences <- function(
 
     if (using_parent) {
       if (length(target_info$parents) == 0) {
-        stop("Diff on the first commit has not yet been implemented.")
+        cli::cli_abort("Diff on the first commit has not yet been implemented.")
       }
       source_commit <- target_info$parents[[1]]
     }
 
     if (is.null(source_commit) || !nzchar(source_commit)) {
-      stop("Unable to determine source commit for comparison.")
+      cli::cli_abort("Unable to determine source commit for comparison.")
     }
 
     if (!using_parent) {
@@ -150,12 +150,12 @@ get_commit_differences <- function(
       err <- attr(diff_output, "stderr")
       err_msg <- if (length(err)) paste(err, collapse = "\n") else
         "unknown git error"
-      stop("Failed to compute git diff: ", err_msg)
+      cli::cli_abort("Failed to compute git diff: {err_msg}")
     }
     diff_text <- paste(diff_output, collapse = "\n")
 
     if (identical(diff_text, "")) {
-      message("No differences between the commits.")
+      cli::cli_alert_info("No differences between the commits.")
       return(NULL)
     }
 
@@ -245,7 +245,7 @@ get_uncommitted_changes <- function(
       err <- attr(changes, "stderr")
       err_msg <- if (length(err)) paste(err, collapse = "\n") else
         "unknown git error"
-      stop("Failed to retrieve git diff: ", err_msg)
+      cli::cli_abort("Failed to retrieve git diff: {err_msg}")
     }
 
     diff_text <- paste(changes, collapse = "\n")
@@ -253,9 +253,9 @@ get_uncommitted_changes <- function(
     # If there are no differences, return NULL
     if (identical(diff_text, "")) {
       if (isTRUE(staged)) {
-        message("No staged changes.")
+        cli::cli_alert_info("No staged changes.")
       } else {
-        message("No uncommitted changes since the last commit.")
+        cli::cli_alert_info("No uncommitted changes since the last commit.")
       }
 
       return(NULL)

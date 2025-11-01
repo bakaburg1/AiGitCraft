@@ -14,15 +14,14 @@ invoke_llm <- function(system_prompt, user_prompt, ...) {
   if (is.null(args$name)) {
     default_name <- getOption("aigitcraft_llm", "openai/gpt-4.1")
     if (is.null(default_name) || !nzchar(default_name)) {
-      stop(
-        "Please supply a provider via the `name` argument or set ",
-        "options(aigitcraft_llm = \"provider/model\")."
+      cli::cli_abort(
+        "Please supply a provider via the `name` argument or set options(aigitcraft_llm = \"provider/model\")."
       )
     }
     args$name <- default_name
   }
 
-  cli::cli_alert_info("Using the {args$name} model...")
+  cli::cli_alert("Using the {.val {args$name}} model...")
 
   args$system_prompt <- system_prompt
 
