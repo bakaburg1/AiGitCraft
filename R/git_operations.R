@@ -231,6 +231,8 @@ get_uncommitted_changes <- function(
 ) {
   validate_repo_path(repo_path)
 
+  head_exists <- git_head_exists(repo_path)
+
   if (length(screened_folders) == 0) {
     screened_folders <- NULL
   }
@@ -239,7 +241,11 @@ get_uncommitted_changes <- function(
     diff_args <- if (isTRUE(staged)) {
       c("diff", "--cached")
     } else {
-      c("diff", "HEAD")
+      if (head_exists) {
+        c("diff", "HEAD")
+      } else {
+        c("diff")
+      }
     }
 
     if (!is.null(screened_folders)) {

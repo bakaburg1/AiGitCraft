@@ -161,3 +161,20 @@ test_that("get_uncommitted_changes reports staged and unstaged", {
   staged <- get_uncommitted_changes(repo_path = repo, staged = TRUE)
   expect_match(staged, "modified")
 })
+
+test_that("get_uncommitted_changes handles unborn HEAD", {
+  skip_if_not_installed("gert")
+  skip_if_no_git()
+
+  repo <- withr::local_tempdir()
+  gert::git_init(repo)
+
+  withr::with_dir(repo, {
+    writeLines("line1", "file.txt")
+    gert::git_add("file.txt")
+    writeLines(c("line1", "line2"), "file.txt")
+  })
+
+  unstaged <- get_uncommitted_changes(repo_path = repo)
+  expect_match(unstaged, "line2")
+})

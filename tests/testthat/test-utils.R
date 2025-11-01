@@ -1,3 +1,9 @@
+skip_if_no_git <- function() {
+  if (identical(Sys.which("git"), "")) {
+    skip("git executable not available")
+  }
+}
+
 test_that("generate_context_file_prompt returns formatted content", {
   tmp <- withr::local_tempfile()
   writeLines(c("alpha", "beta"), tmp)
@@ -53,4 +59,30 @@ test_that("resolve_git_branch selects head branch from data frame", {
 
   branch <- resolve_git_branch(branch_df, repo)
   expect_identical(branch, "feature")
+})
+
+test_that("git_head_exists detects unborn HEAD", {
+  skip_if_not_installed("gert")
+  skip_if_no_git()
+
+  repo <- withr::local_tempdir()
+  gert::git_init(repo)
+
+  expect_false(git_head_exists(repo))
+})
+
+test_that("git_head_exists detects existing HEAD", {
+  skip_if_not_installed("gert")
+  skip_if_no_git()
+
+  repo <- withr::local_tempdir()
+  gert::git_init(repo)
+
+  withr::with_dir(repo, {
+    writeLines("initial", "file.txt")
+    gert::git_add("file.txt")
+    gert::git_commit("Initial commit")
+  })
+
+  expect_true(git_head_exists(repo))
 })

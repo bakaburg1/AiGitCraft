@@ -153,6 +153,27 @@ resolve_git_branch <- function(branch_info, repo_path) {
   )
 }
 
+#' Check whether the repository has at least one commit
+#'
+#' @param repo_path The path to the repository.
+#'
+#' @return Logical scalar, TRUE if HEAD exists.
+git_head_exists <- function(repo_path) {
+  validate_repo_path(repo_path)
+
+  withr::with_dir(repo_path, {
+    status <- suppressWarnings(
+      system2(
+        command = "git",
+        args = c("rev-parse", "--verify", "HEAD"),
+        stdout = FALSE,
+        stderr = FALSE
+      )
+    )
+    identical(status, 0L)
+  })
+}
+
 #' Include context from a file in a prompt
 #'
 #' This function reads a file and includes its content in a prompt.
