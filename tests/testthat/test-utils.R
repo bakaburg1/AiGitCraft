@@ -37,3 +37,20 @@ test_that("validate_repo_path checks git root", {
   nogit <- withr::local_tempdir()
   expect_error(validate_repo_path(nogit), "does not contain a .git")
 })
+
+test_that("resolve_git_branch returns name from character vector", {
+  branch <- resolve_git_branch(c("dev", "main"), tempdir())
+  expect_identical(branch, "dev")
+})
+
+test_that("resolve_git_branch selects head branch from data frame", {
+  repo <- withr::local_tempdir()
+  branch_df <- data.frame(
+    name = c("main", "feature"),
+    head = c(FALSE, TRUE),
+    active = c(FALSE, TRUE)
+  )
+
+  branch <- resolve_git_branch(branch_df, repo)
+  expect_identical(branch, "feature")
+})

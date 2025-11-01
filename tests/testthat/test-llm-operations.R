@@ -25,6 +25,58 @@ test_that("write_pull_request_description sends diff context to LLM", {
   expect_match(calls$user, "commit diff text")
 })
 
+test_that("write_pull_request_description auto-detects active branch", {
+  skip_if_not_installed("gert")
+  if (identical(Sys.which("git"), "")) {
+    skip("git executable not available")
+  }
+
+  repo <- withr::local_tempdir()
+  gert::git_init(repo)
+
+  withr::with_dir(repo, {
+    writeLines("base", "file.txt")
+    gert::git_add("file.txt")
+    gert::git_commit("Base commit")
+    gert::git_branch_create("feature")
+  })
+
+  default_branch <- withr::with_dir(repo, gert::git_branch())
+
+  branch_df <- data.frame(
+    name = c(default_branch, "feature"),
+    head = c(FALSE, TRUE),
+    active = c(FALSE, TRUE),
+    stringsAsFactors = FALSE
+  )
+
+  captured_branch <- NULL
+
+  capture.output(
+    testthat::with_mocked_bindings(
+      {
+        testthat::with_mocked_bindings(
+          write_pull_request_description(
+            repo_path = repo,
+            source_branch = default_branch,
+            use_description = FALSE,
+            use_readme = FALSE
+          ),
+          get_branch_differences = function(repo_path, target_branch, ...) {
+            captured_branch <<- target_branch
+            "diff text"
+          },
+          invoke_llm = function(system_prompt, user_prompt, ...) "mock response"
+        )
+      },
+      git_branch = function(repo) branch_df,
+      .package = "gert"
+    )
+  )
+
+  expect_identical(captured_branch, "feature")
+})
+
 test_that("perform_code_change_review relays diff to invoke_llm", {
   skip_if_not_installed("gert")
 
