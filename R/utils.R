@@ -19,16 +19,20 @@ check_and_install_dependencies <- function(deps) {
         # Only in interactive sessions, otherwise just stop
         do_install <- utils::menu(
           c("Yes", "No"),
-          title = paste0(dep, " is not installed. Install it now?")) == 1
+          title = paste0(dep, " is not installed. Install it now?")
+        )
 
-        if(do_install) {
-          tryCatch({
-            utils::install.packages(dep)
-            # After successful installation, recheck if the package is now installed
-            is_installed <- requireNamespace(dep, quietly = FALSE)
-          }, error = function(e) {
-            stop("Failed to install ", dep, ": ", e$message)
-          })
+        if (do_install == 1) {
+          tryCatch(
+            {
+              utils::install.packages(dep)
+              # After successful installation, recheck if the package is now installed
+              is_installed <- requireNamespace(dep, quietly = FALSE)
+            },
+            error = function(e) {
+              stop("Failed to install ", dep, ": ", e$message)
+            }
+          )
         }
       }
     }
@@ -69,7 +73,9 @@ generate_context_file_prompt <- function(file_path, prompt_text) {
 
   if (file.exists(file_path)) {
     prompt <- paste0(
-      "\n\n", prompt_text, "\n\n####\n",
+      "\n\n",
+      prompt_text,
+      "\n\n####\n",
       readr::read_file(file_path),
       "####"
     )
