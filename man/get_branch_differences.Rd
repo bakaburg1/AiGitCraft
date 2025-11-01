@@ -6,7 +6,7 @@
 \usage{
 get_branch_differences(
   repo_path = getOption("aigitcraft_repo", getwd()),
-  target_branch = git2r::repository_head()$name,
+  target_branch = NULL,
   source_branch = "main",
   screened_folders = NULL
 )

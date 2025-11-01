@@ -35,7 +35,8 @@ analyzing non-code and documentation files.}
 
 \item{recursive}{Logical indicating whether to search for files recursively.}
 
-\item{...}{Additional arguments to be passed to \code{llmR::prompt_llm}.}
+\item{...}{Additional arguments forwarded to \code{\link[ellmer:chat-any]{ellmer::chat()}} to configure
+the provider or model.}
 }
 \value{
 A character string with the content of the README file.

@@ -23,7 +23,8 @@ the DESCRIPTION file in the review context.}
 \item{use_readme}{Logical indicating whether to include the content of the
 README.md file in the review context.}
 
-\item{...}{Additional arguments to be passed to \code{llmR::prompt_llm}.}
+\item{...}{Additional arguments forwarded to \code{\link[ellmer:chat-any]{ellmer::chat()}} to configure
+the provider or model.}
 }
 \value{
 A character string with the code review report.
