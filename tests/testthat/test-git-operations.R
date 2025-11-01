@@ -1,6 +1,7 @@
 skip_if_no_git <- function() {
-  if (identical(Sys.which("git"), ""))
+  if (identical(Sys.which("git"), "")) {
     skip("git executable not available")
+  }
 }
 
 test_that("get_commit_differences compares commits", {

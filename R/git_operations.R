@@ -139,17 +139,28 @@ get_commit_differences <- function(
       diff_args <- c(diff_args, "--", screened_folders)
     }
 
+    # Capture stderr separately to preserve detailed git error messages
+    diff_stderr <- tempfile()
+    on.exit(unlink(diff_stderr), add = TRUE)
+
     diff_output <- system2(
       command = "git",
       args = diff_args,
       stdout = TRUE,
-      stderr = TRUE
+      stderr = diff_stderr
     )
     status <- attr(diff_output, "status")
+    diff_errors <- if (file.exists(diff_stderr)) {
+      readLines(diff_stderr, warn = FALSE)
+    } else {
+      character()
+    }
     if (!is.null(status) && status != 0) {
-      err <- attr(diff_output, "stderr")
-      err_msg <- if (length(err)) paste(err, collapse = "\n") else
+      err_msg <- if (length(diff_errors)) {
+        paste(diff_errors, collapse = "\n")
+      } else {
         "unknown git error"
+      }
       cli::cli_abort("Failed to compute git diff: {err_msg}")
     }
     diff_text <- paste(diff_output, collapse = "\n")
@@ -234,17 +245,28 @@ get_uncommitted_changes <- function(
       diff_args <- c(diff_args, "--", screened_folders)
     }
 
+    # Capture stderr separately to preserve detailed git error messages
+    changes_stderr <- tempfile()
+    on.exit(unlink(changes_stderr), add = TRUE)
+
     changes <- system2(
       command = "git",
       args = diff_args,
       stdout = TRUE,
-      stderr = TRUE
+      stderr = changes_stderr
     )
     status <- attr(changes, "status")
+    change_errors <- if (file.exists(changes_stderr)) {
+      readLines(changes_stderr, warn = FALSE)
+    } else {
+      character()
+    }
     if (!is.null(status) && status != 0) {
-      err <- attr(changes, "stderr")
-      err_msg <- if (length(err)) paste(err, collapse = "\n") else
+      err_msg <- if (length(change_errors)) {
+        paste(change_errors, collapse = "\n")
+      } else {
         "unknown git error"
+      }
       cli::cli_abort("Failed to retrieve git diff: {err_msg}")
     }
 
