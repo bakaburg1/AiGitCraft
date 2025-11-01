@@ -4,6 +4,7 @@
 # AiGitCraft
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 AiGitCraft is an R package designed to enhance Git operations by
@@ -168,52 +169,34 @@ write_repo_readme(
 
 ## Configuration
 
-AiGitCraft uses the `bakaburg1/llmR` package to interact with Large
-Language Models (LLMs). To interact with LLM through the llmR package
-you need to set up the necessary API keys and model identifiers for the
-language model providers you intend to use. This can be done by setting
-the appropriate options in R:
+AiGitCraft uses the CRAN package `ellmer` to interact with Large
+Language Models (LLMs). `ellmer` provides a provider-agnostic chat
+interface; AiGitCraft simply forwards the arguments you pass in `...` to
+`ellmer::chat()`. You can set your preferred provider and model globally
+with the `aigitcraft_llm` option:
 
 ``` r
-# OpenAI configuration example
+options(aigitcraft_llm = "openai/gpt-4.1")
+```
 
-options(
-  
-  # API providers
-  llmr_llm_provider = "openai",
-  
-  # OpenAI GPT API
-  llmr_openai_api_key_gpt = "your-openai-api-key",
-)
+Ensure the credentials required by the selected provider are available
+(for example, set `OPENAI_API_KEY` for OpenAI). Refer to the [ellmer
+documentation](https://ellmer.tidyverse.org) for guidance on
+authenticated providers.
 
-# Azure configuration example
+You can manage these credentials from R with
+`usethis::edit_r_environ()`, which opens your project `.Renviron` file
+so you can add entries such as `OPENAI_API_KEY=your-key-here`. Restart
+your R session after saving to ensure the new values are loaded.
 
-options(
+You can override the defaults per call by supplying arguments that
+`ellmer::chat()` understands:
 
-  # API providers
-  llmr_llm_provider = "azure",
-
-  # Azure GPT API
-  llmr_azure_resource_gpt = "your-azure-resource",
-  llmr_azure_deployment_gpt = "your-azure-deployment",
-  llmr_azure_api_key_gpt = "your-azure-api-key",
-
-  # Azure common parameters
-  llmr_azure_api_version = "" # See Azure API documentation
-)
-
-# Custom LLM server configuration example
-# Can be used for local LLM servers or custom API endpoints following the
-# OpenAi API specification.
-
-options(
-
-  # API providers
-  llmr_llm_provider = "custom",
-
-  # Local LLM server example
-  llmr_custom_llm_endpoint = "http://localhost:1234/v1/chat/completions",
-  llmr_custom_model_gpt = "llama3-8b-8192"
+``` r
+write_commit_message(
+  repo_path,
+  name = "anthropic/claude-3-5-sonnet",
+  params = ellmer::params(temperature = 0.2)
 )
 ```
 
