@@ -45,7 +45,10 @@ write_pull_request_description <- function(
   }
 
   if (is.null(target_branch)) {
-    target_branch <- gert::git_branch(repo = repo_path)
+    target_branch <- resolve_git_branch(
+      gert::git_branch(repo = repo_path),
+      repo_path
+    )
   }
 
   withr::with_dir(repo_path, {

@@ -31,49 +31,7 @@ get_branch_differences <- function(
 
   if (is.null(target_branch)) {
     branch_info <- gert::git_branch(repo = repo_path)
-    if (is.data.frame(branch_info)) {
-      if (nrow(branch_info) == 0L) {
-        cli::cli_abort("No branches found in repository {.path {repo_path}}.")
-      }
-
-      branch_flags <- rep(FALSE, nrow(branch_info))
-      if ("head" %in% names(branch_info)) {
-        branch_flags <- branch_flags | vapply(
-          branch_info$head,
-          function(value) isTRUE(as.logical(value)),
-          logical(1)
-        )
-      }
-      if ("active" %in% names(branch_info)) {
-        branch_flags <- branch_flags | vapply(
-          branch_info$active,
-          function(value) isTRUE(as.logical(value)),
-          logical(1)
-        )
-      }
-
-      head_idx <- which(branch_flags)
-      if (length(head_idx) == 0L) {
-        head_idx <- 1L
-      } else {
-        head_idx <- head_idx[[1]]
-      }
-
-      name_column <- NULL
-      if ("name" %in% names(branch_info)) {
-        name_column <- branch_info$name
-      } else if ("branch" %in% names(branch_info)) {
-        name_column <- branch_info$branch
-      }
-
-      if (is.null(name_column) || length(name_column) < head_idx) {
-        cli::cli_abort("Unable to determine target branch from repository metadata.")
-      }
-
-      target_branch <- name_column[[head_idx]]
-    } else {
-      target_branch <- branch_info
-    }
+    target_branch <- resolve_git_branch(branch_info, repo_path)
   }
 
   max_commits <- getOption("aigitcraft_git_log_max", 1000L)
