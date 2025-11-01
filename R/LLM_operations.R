@@ -1,4 +1,3 @@
-
 #' Create a pull request description automatically
 #'
 #' This function uses LLM to create a pull request description automatically
@@ -15,21 +14,21 @@
 #'   the DESCRIPTION file in the repository to help understand the changes.
 #' @param use_readme Logical indicating whether to include the content of the
 #'   README.md file in the repository to help understand the changes.
-#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
+#' @param ... Additional arguments forwarded to [ellmer::chat()] to configure
+#'   the provider or model.
 #'
 #' @return A character string with the pull request description.
 #'
 #' @export
 write_pull_request_description <- function(
-    repo_path = getOption("aigitcraft_repo", getwd()),
-    target_branch = git2r::repository_head()$name,
-    source_branch = "main",
-    screened_folders = NULL,
-    use_description = TRUE,
-    use_readme = TRUE,
-    ...
+  repo_path = getOption("aigitcraft_repo", getwd()),
+  target_branch = NULL,
+  source_branch = "main",
+  screened_folders = NULL,
+  use_description = TRUE,
+  use_readme = TRUE,
+  ...
 ) {
-
   # Validate input
   validate_repo_path(repo_path)
 
@@ -45,15 +44,19 @@ write_pull_request_description <- function(
     readme_prompt <- generate_README_context_prompt(repo_path)
   }
 
-  withr::with_dir(repo_path, {
+  if (is.null(target_branch)) {
+    target_branch <- gert::git_branch(repo = repo_path)
+  }
 
+  withr::with_dir(repo_path, {
     system_prompt = "You are an AI expert in git and version control understanding, whose goal is to help a developer write a pull request description."
 
     diff_text <- get_branch_differences(
       repo_path = repo_path,
       target_branch = target_branch,
       source_branch = source_branch,
-      screened_folders = screened_folders)
+      screened_folders = screened_folders
+    )
 
     if (is.null(diff_text)) {
       return(NULL)
@@ -94,11 +97,11 @@ General description of the changes.
 
 Try to infer the most user impacting changes and put them first in the description and use them to draft the pull request title.
 
-Conclude the pull request description with a short and funny poetry of maximum 6 lines expressing the essence of the changes.") |>
+Conclude the pull request description with a short and funny poetry of maximum 6 lines expressing the essence of the changes."
+    ) |>
       paste(collapse = "\n\n")
 
-    res <- llmR::prompt_llm(
-      c(system = system_prompt, user = user_prompt), ...)
+    res <- invoke_llm(system_prompt, user_prompt, ...)
 
     cat(res)
 
@@ -118,19 +121,19 @@ Conclude the pull request description with a short and funny poetry of maximum 6
 #'   the DESCRIPTION file in the review context.
 #' @param use_readme Logical indicating whether to include the content of the
 #'   README.md file in the review context.
-#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
+#' @param ... Additional arguments forwarded to [ellmer::chat()] to configure
+#'   the provider or model.
 #'
 #' @return A character string with the code review report.
 #'
 #' @export
 perform_code_change_review <- function(
-    git_diff,
-    repo_path = getOption("aigitcraft_repo", getwd()),
-    use_description = TRUE,
-    use_readme = TRUE,
-    ...
+  git_diff,
+  repo_path = getOption("aigitcraft_repo", getwd()),
+  use_description = TRUE,
+  use_readme = TRUE,
+  ...
 ) {
-
   # Validate input
   validate_repo_path(repo_path)
 
@@ -154,7 +157,8 @@ perform_code_change_review <- function(
   system_prompt <- paste(
     "You are an experienced software engineer tasked with performing a",
     "detailed code review. Your goal is to provide comprehensive feedback",
-    "on the code changes.")
+    "on the code changes."
+  )
 
   # Construct the user prompt for the LLM
   user_prompt <- paste0(
@@ -184,8 +188,7 @@ perform_code_change_review <- function(
   )
 
   # Make the API call to the LLM
-  res <- llmR::prompt_llm(
-    c(system = system_prompt, user = user_prompt), ...)
+  res <- invoke_llm(system_prompt, user_prompt, ...)
 
   cat(res)
 
@@ -211,23 +214,23 @@ perform_code_change_review <- function(
 #' @param suggest_commits Logical indicating whether to include a prompt to
 #'   suggest a commit message and the involved files and lines for each logical
 #'   group of changes.
-#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
+#' @param ... Additional arguments forwarded to [ellmer::chat()] to configure
+#'   the provider or model.
 #'
 #' @return A character string with the description of the changes.
 #'
 #' @export
 #'
 describe_uncommitted_changes <- function(
-    repo_path = getOption("aigitcraft_repo", getwd()),
-    screened_folders = NULL,
-    staged = FALSE,
-    use_description = TRUE,
-    use_readme = TRUE,
-    cite_changes = TRUE,
-    suggest_commits = TRUE,
-    ...
+  repo_path = getOption("aigitcraft_repo", getwd()),
+  screened_folders = NULL,
+  staged = FALSE,
+  use_description = TRUE,
+  use_readme = TRUE,
+  cite_changes = TRUE,
+  suggest_commits = TRUE,
+  ...
 ) {
-
   # Validate input
   validate_repo_path(repo_path)
 
@@ -244,11 +247,11 @@ describe_uncommitted_changes <- function(
   }
 
   withr::with_dir(repo_path, {
-
     uncommitted_changes <- get_uncommitted_changes(
       repo_path = repo_path,
       staged = staged,
-      screened_folders = screened_folders)
+      screened_folders = screened_folders
+    )
 
     if (is.null(uncommitted_changes)) {
       return(NULL)
@@ -275,13 +278,11 @@ describe_uncommitted_changes <- function(
     ) |>
       paste(collapse = "\n")
 
-    res <- llmR::prompt_llm(
-      c(system = system_prompt, user = user_prompt), ...)
+    res <- invoke_llm(system_prompt, user_prompt, ...)
 
     cat(res)
 
     invisible(res)
-
   })
 }
 
@@ -300,20 +301,20 @@ describe_uncommitted_changes <- function(
 #'   README.md file to help understand the changes.
 #' @param use_files A vector of file paths to analyze to help understand the
 #'   changes.
-#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
+#' @param ... Additional arguments forwarded to [ellmer::chat()] to configure
+#'   the provider or model.
 #'
 #' @return A character string with the commit message.
 #'
 #' @export
 write_commit_message <- function(
-    repo_path = getOption("aigitcraft_repo", getwd()),
-    use_conventional_commit = TRUE,
-    use_description = TRUE,
-    use_readme = TRUE,
-    use_files = NULL,
-    ...
+  repo_path = getOption("aigitcraft_repo", getwd()),
+  use_conventional_commit = TRUE,
+  use_description = TRUE,
+  use_readme = TRUE,
+  use_files = NULL,
+  ...
 ) {
-
   # Validate input
   validate_repo_path(repo_path)
 
@@ -330,9 +331,10 @@ write_commit_message <- function(
   }
 
   withr::with_dir(repo_path, {
-
     staged_changes <- get_uncommitted_changes(
-      repo_path = repo_path, staged = TRUE)
+      repo_path = repo_path,
+      staged = TRUE
+    )
 
     if (is.null(staged_changes)) {
       return(NULL)
@@ -348,9 +350,17 @@ write_commit_message <- function(
         c(
           "The following is the content of related files you need to analyze to understand the changes:",
           "####",
-          purrr::map_chr(use_files, ~ paste0(
-            "------------- ", .x, "\n", readr::read_file(.x), "\n\n")
-          ) |> paste(collapse = "\n\n"),
+          purrr::map_chr(
+            use_files,
+            ~ paste0(
+              "------------- ",
+              .x,
+              "\n",
+              readr::read_file(.x),
+              "\n\n"
+            )
+          ) |>
+            paste(collapse = "\n\n"),
           "####"
         )
       },
@@ -379,13 +389,11 @@ write_commit_message <- function(
     ) |>
       paste(collapse = "\n")
 
-    res <- llmR::prompt_llm(
-      c(system = system_prompt, user = user_prompt), ...)
+    res <- invoke_llm(system_prompt, user_prompt, ...)
 
     cat(res)
 
     invisible(res)
-
   })
 }
 
@@ -411,22 +419,22 @@ write_commit_message <- function(
 #'   suggested to include only the code folders, e.g. c("R", "src"), to avoid
 #'   analyzing non-code and documentation files.
 #' @param recursive Logical indicating whether to search for files recursively.
-#' @param ... Additional arguments to be passed to `llmR::prompt_llm`.
+#' @param ... Additional arguments forwarded to [ellmer::chat()] to configure
+#'   the provider or model.
 #'
 #' @return A character string with the content of the README file.
 #'
 #' @export
 #'
 write_repo_readme <- function(
-    repo_path = getOption("aigitcraft_repo", getwd()),
-    use_description = TRUE,
-    use_current_readme = TRUE,
-    file_exts = getOption("aigitcraft_file_exts"),
-    screened_folders = getOption("aigitcraft_screened_folders", repo_path),
-    recursive = TRUE,
-    ...
+  repo_path = getOption("aigitcraft_repo", getwd()),
+  use_description = TRUE,
+  use_current_readme = TRUE,
+  file_exts = getOption("aigitcraft_file_exts"),
+  screened_folders = getOption("aigitcraft_screened_folders", repo_path),
+  recursive = TRUE,
+  ...
 ) {
-
   # Validate input
   validate_repo_path(repo_path)
 
@@ -439,23 +447,31 @@ write_repo_readme <- function(
   }
 
   withr::with_dir(repo_path, {
-
     system_prompt = "You are an AI expert in git and version control understanding, whose goal is to help a developer write a README file for a code repository."
 
     # Get the content of the code files
     file_text <- list.files(
-      screened_folders, full.names = T, recursive = T,
+      screened_folders,
+      full.names = T,
+      recursive = T,
       pattern = if (!is.null(file_exts)) {
         paste0("\\.(", file_exts |> paste(collapse = "|"), ")$")
       } else {
         "\\.[^\\.]+$"
       },
-      ignore.case = T) |>
+      ignore.case = T
+    ) |>
       stringr::str_subset("README", negate = T) |>
-      purrr::map_chr(~ paste0(
-        "------------- ", .x, "\n", readr::read_file(.x), "\n\n")
-      ) |> paste(collapse = "\n\n")
-
+      purrr::map_chr(
+        ~ paste0(
+          "------------- ",
+          .x,
+          "\n",
+          readr::read_file(.x),
+          "\n\n"
+        )
+      ) |>
+      paste(collapse = "\n\n")
 
     user_prompt = paste0(
       "I'm working on a code repo and I need to write/improve the README.md file for it.",
@@ -479,13 +495,11 @@ write_repo_readme <- function(
       }
     )
 
-    res <- llmR::prompt_llm(
-      c(system = system_prompt, user = user_prompt), ...)
+    res <- invoke_llm(system_prompt, user_prompt, ...)
 
     cat(res)
 
     invisible(res)
-
   })
 }
 
@@ -500,13 +514,11 @@ write_repo_readme <- function(
 #' @export
 #'
 generate_twitter_thread <- function(
-    repo_path = getOption("aigitcraft_repo", getwd())
+  repo_path = getOption("aigitcraft_repo", getwd())
 ) {
-
   validate_repo_path(repo_path)
 
   withr::with_dir(repo_path, {
-
     if (!file.exists("README.md")) {
       stop("The README.md file does not exist in the repository.")
     }
@@ -522,12 +534,10 @@ generate_twitter_thread <- function(
     ) |>
       paste(collapse = "\n")
 
-    res <- llmR::prompt_llm(
-      c(system = system_prompt, user = user_prompt))
+    res <- invoke_llm(system_prompt, user_prompt)
 
     cat(res)
 
     invisible(res)
-
   })
 }
