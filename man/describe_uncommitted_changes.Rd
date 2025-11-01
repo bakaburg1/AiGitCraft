@@ -36,7 +36,8 @@ the relevant files and lines for the changes.}
 suggest a commit message and the involved files and lines for each logical
 group of changes.}
 
-\item{...}{Additional arguments to be passed to \code{llmR::prompt_llm}.}
+\item{...}{Additional arguments forwarded to \code{\link[ellmer:chat-any]{ellmer::chat()}} to configure
+the provider or model.}
 }
 \value{
 A character string with the description of the changes.

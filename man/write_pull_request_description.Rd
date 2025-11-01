@@ -6,7 +6,7 @@
 \usage{
 write_pull_request_description(
   repo_path = getOption("aigitcraft_repo", getwd()),
-  target_branch = git2r::repository_head()$name,
+  target_branch = NULL,
   source_branch = "main",
   screened_folders = NULL,
   use_description = TRUE,
@@ -32,7 +32,8 @@ the DESCRIPTION file in the repository to help understand the changes.}
 \item{use_readme}{Logical indicating whether to include the content of the
 README.md file in the repository to help understand the changes.}
 
-\item{...}{Additional arguments to be passed to \code{llmR::prompt_llm}.}
+\item{...}{Additional arguments forwarded to \code{\link[ellmer:chat-any]{ellmer::chat()}} to configure
+the provider or model.}
 }
 \value{
 A character string with the pull request description.

@@ -11,4 +11,3 @@
 ## usethis namespace: end
 NULL
 "_PACKAGE"
-

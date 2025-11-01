@@ -5,12 +5,15 @@
 \title{Get the differences between two commits}
 \usage{
 get_commit_differences(
-  target_commit = git2r::last_commit(getOption("aigitcraft_repo", getwd())),
+  repo_path = getOption("aigitcraft_repo", getwd()),
+  target_commit = NULL,
   source_commit = NULL,
   screened_folders = NULL
 )
 }
 \arguments{
+\item{repo_path}{The path to the repository.}
+
 \item{target_commit}{The target commit.}
 
 \item{source_commit}{The source commit. If NULL, the parent commit of the
